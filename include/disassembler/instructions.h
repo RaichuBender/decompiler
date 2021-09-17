@@ -21,9 +21,9 @@ typedef enum
 	REG,
 	OP,
 	CONST,
-	REGADR,
-	OPADR,
-	CONSTADR
+	REG_ADR,
+	OP_ADR,
+	CONST_ADR
 } AFFECTS;
 
 typedef struct
@@ -40,8 +40,7 @@ typedef enum
 	NOTHING,
 	ADD,
 	SUBTRACT,
-	SHIFT_LEFT,
-	SHIFT_RIGHT,
+	BIT_MANIP,
 	JUMP,
 	CALL,
 	RETURN,
@@ -57,9 +56,9 @@ typedef struct
 
 typedef struct
 {
-	const char *	 mnemonic;
+	const char *mnemonic;
 #ifdef _UNINDEXED
-	u8				 opcode;
+	u8 opcode;
 #endif // _UNINDEXED
 	s32				 operand_count;
 	s32				 cycles;

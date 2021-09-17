@@ -9,9 +9,11 @@ typedef enum _ENDIANNESS
 
 typedef struct _LANGUAGE
 {
-	const char *display_name;
-	ENDIANNESS	endian;
-	int			address_size;
+	const char * display_name;
+	const char **user_description;
+
+	ENDIANNESS endian;
+	int		   address_size;
 } LANGUAGE;
 
 #endif //__LANGUAGE_H__

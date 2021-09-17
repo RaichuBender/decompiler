@@ -1,4 +1,6 @@
 %{
+// #define _VERBOSE
+#define ADD_TXT(fmt, ...) { pTxt += sprintf(pTxt, fmt __VA_OPT__(,) __VA_ARGS__  ); }
 
 	char final_out[1024];
 	char *pTxt = final_out;
@@ -7,8 +9,6 @@
 	char *endian		= NULL;
 	char *address_size	= NULL;
 	char *end_lang		= NULL;
-
-#define ADD_TXT(fmt, ...) { pTxt += sprintf(pTxt, fmt __VA_OPT__(,) __VA_ARGS__  ); }
 
 %}
 
@@ -59,6 +59,7 @@ int main()
 		exit(-1);
 	}
 
+#ifdef    _VERBOSE
 	ADD_TXT(  "LANGUAGE %1$s =\n{\n\t/* display_name: */\t\"%1$s\",\n\t",
 			  strchr(display_name, L'(') + 1  );
 
@@ -69,6 +70,18 @@ int main()
 			  strchr(address_size, L':') + 1  );
 
 	ADD_TXT(  "};"  );
+#else  // _VERBOSE
+	ADD_TXT(  "LANGUAGE %1$s =\n{\n\t\"%1$s\",\n\t",
+			  strchr(display_name, L'(') + 1  );
+
+	ADD_TXT(  "%s,\n\t",
+			  strchr(endian, L' ') + 1  );
+
+	ADD_TXT(  "%s,\n",
+			  strchr(address_size, L' ') + 1  );
+
+	ADD_TXT(  "};"  );
+#endif // _VERBOSE
 
 	char file_name[260];
 	display_name = strchr(  display_name, L'('  ) + 1;
@@ -79,10 +92,10 @@ int main()
 
 	char def_cmd[1024];
 	sprintf(  def_cmd,
-			  "touch include/languages_def.inc.0 && \
-			   echo \"extern LANGUAGE %1$s;\" >> include/languages_def.inc.0 && \
-			   touch include/languages_def.inc.1 && \
+
+			  "echo \"extern LANGUAGE %1$s;\" >> include/languages_def.inc.0 && \
 			   echo \"%1$s,\" >> include/languages_def.inc.1",
+
 			  display_name  );
 
 	system(  def_cmd  );

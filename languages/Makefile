@@ -1,3 +1,5 @@
+ROOTPARH	:=	../
+
 include ../common.mk
 
 INCLUDE	+=	-I../include
@@ -10,16 +12,18 @@ SOURCES	:=	$(wildcard src/*.c)
 OBJECTS	:=	$(patsubst src/%,obj/%,$(SOURCES))
 OBJECTS	:=	$(OBJECTS:%.c=%.o)
 
+CFLAGS	:=	-fPIC
+
 default:	$(OUT)
 	@$(MAKE) -f modules.mk
 	@$(MAKE) all
 
 all:		$(OUTPUT)
 $(OUTPUT):	$(OBJECTS)
-	$(LD) -o $@	$^ $(CFLAGS) $(INCLUDE) $(LIB)
+	$(CC) -o $@ -shared	$^ $(CFLAGS) $(INCLUDE) $(LIB)
 
 obj/%.o:	src/%.c
-	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(LIB)
+	$(CC) -o $@ -c		$^ $(CFLAGS) $(INCLUDE) $(LIB)
 
 $(OUT):
 	@-mkdir $@
