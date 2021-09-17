@@ -1,0 +1,15 @@
+.vscode
+.clang-format
+*.code-workspace
+env
+
+bin
+obj
+*.o
+*.so
+
+main
+parse_lang
+*.inc.*
+*.lang.c
+tmp

@@ -1,0 +1,30 @@
+include ../common.mk
+
+INCLUDE	+=	-I../include
+LIB	:=
+OUT	:=	obj tmp
+
+OUTPUT	:=	../lib/languages.so
+
+SOURCES	:=	$(wildcard src/*.c)
+OBJECTS	:=	$(patsubst src/%,obj/%,$(SOURCES))
+OBJECTS	:=	$(OBJECTS:%.c=%.o)
+
+default:	$(OUT)
+	@$(MAKE) -f modules.mk
+	@$(MAKE) all
+
+all:		$(OUTPUT)
+$(OUTPUT):	$(OBJECTS)
+	$(LD) -o $@	$^ $(CFLAGS) $(INCLUDE) $(LIB)
+
+obj/%.o:	src/%.c
+	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(LIB)
+
+$(OUT):
+	@-mkdir $@
+
+.PHONY:		clean
+clean:
+	@-rm -rvf $(EXE) $(OUT)
+	@$(MAKE) -f modules.mk clean
