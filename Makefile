@@ -29,7 +29,11 @@ obj/%.o:	src/%.c
 $(OUT):
 	@-mkdir $@
 
-.PHONY:		clean
+.PHONY:		clean clean-all
 clean:
 	@-rm -rf $(EXE) $(OUT)
 	@$(MAKE) -C languages clean
+
+clean-all:
+	@-rm -rf $(EXE) $(OUT)
+	@$(MAKE) -C languages clean-all

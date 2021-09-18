@@ -2,7 +2,7 @@ ROOTPARH	:=	../
 
 include ../common.mk
 
-INCLUDE	+=	-I../include
+INCLUDE	+=	-Iinclude
 LIB	:=
 OUT	:=	obj tmp
 
@@ -28,7 +28,11 @@ obj/%.o:	src/%.c
 $(OUT):
 	@-mkdir $@
 
-.PHONY:		clean
+.PHONY:		clean clean-all
 clean:
 	@-rm -rvf $(EXE) $(OUT)
 	@$(MAKE) -f modules.mk clean
+
+clean-all:
+	@-rm -rvf $(EXE) $(OUT)
+	@$(MAKE) -f modules.mk clean-all

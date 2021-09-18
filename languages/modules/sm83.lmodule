@@ -1,0 +1,6 @@
+LANGUAGE(sm83_asm)
+:: Game Boy SM83 (Z80) assembly language :
+
+	DisplayName: Game Boy SM83 (Z80) asm
+
+LANGUAGE_END

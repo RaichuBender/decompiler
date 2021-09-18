@@ -32,4 +32,11 @@ typedef unsigned char BOOL;
 
 #define BOOLSTR(b) b ? "TRUE" : "FALSE"
 
+typedef enum _ENDIANNESS
+{
+	LITTLE,
+	BIG
+} ENDIANNESS;
+
+
 #endif // __TYPEDEFS_H__

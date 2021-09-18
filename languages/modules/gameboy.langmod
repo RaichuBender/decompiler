@@ -1,4 +1,0 @@
-LANG(GameBoy)
-	Endianness: LITTLE
-	AddressSize: 16
-ENDLANG

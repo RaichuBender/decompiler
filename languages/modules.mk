@@ -2,35 +2,38 @@ ROOTPARH	:=	../
 
 include ../common.mk
 
-LANGMODS	:=	$(wildcard modules/*.langmod)
-LANGMODS	:=	$(patsubst modules/%,tmp/%,$(LANGMODS))
-LANGMODS	:=	$(LANGMODS:%.langmod=%.lmtmp)
+MODULE_SPECS	:=	$(wildcard modules/*module modules/**/*module)
+MODULE_SPECS	:=	$(patsubst modules/%,tmp/%,$(MODULE_SPECS))
+MODULE_SPECS	:=	$(MODULE_SPECS:%module=%.lmtmp)
 
-# .PHONY:		$(LANGMODS)
+# .PHONY:		$(MODULE_SPECS)
 
-default:	parse_lang
+default:	parse_module
 	@echo ''
-	@echo 'Parsing languages'
+	@echo 'Parsing module specs...'
 	@echo ''
 	@echo '--------------------'
-	@-rm -vf include/languages_def.inc.*
-	@$(MAKE) -f modules.mk $(LANGMODS)
-	@rm -f $(LANGMODS)
+	@-rm -vf include/*_def.inc*
+	@$(MAKE) -f modules.mk $(MODULE_SPECS)
+	@rm -f $(MODULE_SPECS)
 	@echo ''
 	@echo '--------------------'
-	@echo 'Parsing SUCCES'
+	@echo 'Parsing SUCCES!'
 	@echo ''
 
-tmp/%.lmtmp:	modules/%.langmod
-	./parse_lang < $^
+tmp/%.lmtmp:	modules/%module
+	./parse_module < $^
 	@touch $@
 
-parse_lang:	parse_lang.l
+parse_module:	parse_module.l
 	flex -o $@.tmp.c $@.l
-	$(CC) $@.tmp.c -o $@ -lfl -Wno-int-conversion
+	$(CC) -O2 -s $@.tmp.c -o $@ -lfl -Wno-int-conversion
 	-@rm $@.tmp.c
 
 
-.PHONY:		clean
+.PHONY:		clean clean-all
 clean:
-	@-rm -vf src/*.lang.c parse_lang parse_lang.tmp.c include/languages_def.inc*
+	@-rm -vf parse_module.tmp.c
+
+clean-all:
+	@-rm -rvf src/*.lang.c parse_module parse_module.tmp.c include/*_def.inc*

@@ -1,3 +1,4 @@
+...
 .vscode
 .clang-format
 *.code-workspace
@@ -9,7 +10,7 @@ obj
 *.so
 
 main
-parse_lang
+parse_module
 *.inc.*
 *.lang.c
 tmp

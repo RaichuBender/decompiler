@@ -1,5 +1,5 @@
-#ifndef __PROJECT_H__
-#define __PROJECT_H__
+#ifndef __ARCHITECTURE_H__
+#define __ARCHITECTURE_H__
 
 #include "typedefs.h"
 
@@ -8,6 +8,6 @@ typedef struct
 	const char *identifier;
 	const char *display_name;
 	const char *user_description;
-} PROJECT;
+} ARCHITECTURE;
 
-#endif // __PROJECT_H__
+#endif // __ARCHITECTURE_H__

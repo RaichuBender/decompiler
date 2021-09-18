@@ -6,8 +6,9 @@
 
 typedef struct
 {
-	const char * display_name;
-	const char **user_description;
+	const char *identifier;
+	const char *display_name;
+	const char *user_description;
 
 	const char imported_file_path[260];
 	u64		   current_version;
