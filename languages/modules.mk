@@ -25,15 +25,14 @@ tmp/%.lmtmp:	modules/%module
 	./parse_module < $^
 	@touch $@
 
-parse_module:	parse_module.l
-	flex -o $@.tmp.c $@.l
-	$(CC) -O2 -s $@.tmp.c -o $@ -lfl -Wno-int-conversion
-	-@rm $@.tmp.c
+parse_module:
+	@$(MAKE) -C pass_noodle
 
 
 .PHONY:		clean clean-all
 clean:
-	@-rm -vf parse_module.tmp.c
+	@-$(MAKE) -C pass_noodle clean
 
 clean-all:
-	@-rm -rvf src/*.lang.c parse_module parse_module.tmp.c include/*_def.inc*
+	@-rm -rvf src/*.module.c include/*_def.inc*
+	@-$(MAKE) -C pass_noodle clean-all

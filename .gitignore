@@ -1,4 +1,5 @@
 ...
+.*
 .vscode
 .clang-format
 *.code-workspace
@@ -12,5 +13,6 @@ obj
 main
 parse_module
 *.inc.*
-*.lang.c
+*.module.c
+*.gen.h
 tmp

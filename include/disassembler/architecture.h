@@ -10,4 +10,6 @@ typedef struct
 	const char *user_description;
 } ARCHITECTURE;
 
+#define NO_DESCRIPTION (0)
+
 #endif // __ARCHITECTURE_H__

@@ -10,4 +10,6 @@ typedef struct _LANGUAGE
 	const char *user_description;
 } LANGUAGE;
 
+#define NO_DESCRIPTION (0)
+
 #endif //__LANGUAGE_H__

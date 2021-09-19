@@ -15,7 +15,7 @@ typedef struct
 	POINTER adr;
 } OFFSET;
 
-int	   disassemble_single(char *pDasm, OFFSET loc);
-char **disassemble_block(OFFSET loc, size_t size);
+int disassemble_single(BYTE *MEM, const char **pDasm, int loc);
+int disassemble_block(BYTE *MEM, const char ***ppDasm, int loc, size_t size);
 
 #endif // __DISASSEMBLE_H__

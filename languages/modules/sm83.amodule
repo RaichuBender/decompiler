@@ -1,5 +1,5 @@
 ARCHITECTURE(sm83)
-:: Nintendo Game Boy CPU :
+#: Nintendo Game Boy CPU
 
 	DisplayName:	Sharp SM83 (Z80)
 	Language:		sm83_asm

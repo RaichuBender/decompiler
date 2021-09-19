@@ -1,5 +1,5 @@
 PLATFORM(gameboy)
-:: Specifications for the Nintendo Game Boy :
+#: Specifications for the Nintendo Game Boy
 
 	DisplayName: 	Nintendo Game Boy
 	Architecture:	sm83

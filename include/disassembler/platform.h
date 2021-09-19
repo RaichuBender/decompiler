@@ -14,4 +14,6 @@ typedef struct
 	u32			address_size;
 } PLATFORM;
 
+#define NO_DESCRIPTION (0)
+
 #endif // __PLATFORM_H__
