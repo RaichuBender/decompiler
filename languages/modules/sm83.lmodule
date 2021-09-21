@@ -116,30 +116,39 @@ LANGUAGE(sm83_asm)
 		}
 	}
 
-	MACRO:LOAD( _REG_, _OP_B_ )
-	=BEGIN
-	"LD _REG_, %s": GROUP( _OP_B_, 8 )
-	{
-		Param[0]:	{	 B      C      D      E      H      L     *(HL)   A    }
-		 Repr[0]:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-		  Cycles:	{	 4      4      4      4      4      4      8      4    }
-
-		Logic
-		{
-			REG_LOAD	_REG_, Param[0];
-		}
-	}
-	=END
-
 	INSTRUCTION_SET	( REGULAR )
 	{
+
 	# 8-bit Loads:
-		%LOAD( B, 0x40 )
-		%LOAD( C, 0x48 )
-		%LOAD( D, 0x50 )
-		%LOAD( E, 0x58 )
-		%LOAD( H, 0x60 )
-		%LOAD( L, 0x68 )
+MACRO:LOAD( _REG_, _OP_B_ )
+=BEGIN
+		"LD _REG_, %s": GROUP( _OP_B_, 8 )
+		{
+			Param[0]:	{	 B      C      D      E      H      L     *(HL)   A    }
+			Repr[0]:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			Cycles:		{	 4      4      4      4      4      4      8      4    }
+
+			Logic
+			{
+				REG_LOAD	_REG_, Param[0];
+			}
+		}
+=END
+
+MACRO:TEST1( _TEST_ )
+=BEGIN
+=END
+
+MACRO:TEST2( _TEST_ )
+=BEGIN
+=END
+
+		^%LOAD( B, 0x40 )
+		^%LOAD( C, 0x48 )
+		^%LOAD( D, 0x50 )
+		^%LOAD( E, 0x58 )
+		^%LOAD( H, 0x60 )
+		^%LOAD( L, 0x68 )
 
 		"LD (HL), %s": GROUP( 0x70, 6 )
 		{
@@ -163,10 +172,10 @@ LANGUAGE(sm83_asm)
 			}
 		}
 
-		%LOAD( A, 0x78 )
+		^%LOAD( A, 0x78 )
 	}
 
 	INSTRUCTION_SET	( CB )
 	{}
 
-LANGUAGE_END
+END_LANGUAGE

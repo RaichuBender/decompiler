@@ -12,7 +12,9 @@ obj
 
 main
 parse_module
+preprocess
 *.inc.*
 *.module.c
+*module.preproc
 *.gen.h
 tmp

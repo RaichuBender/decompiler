@@ -6,8 +6,6 @@ MODULE_SPECS	:=	$(wildcard modules/*module modules/**/*module)
 MODULE_SPECS	:=	$(patsubst modules/%,tmp/%,$(MODULE_SPECS))
 MODULE_SPECS	:=	$(MODULE_SPECS:%module=%.lmtmp)
 
-# .PHONY:		$(MODULE_SPECS)
-
 default:	parse_module
 	@echo ''
 	@echo 'Parsing module specs...'
@@ -22,7 +20,8 @@ default:	parse_module
 	@echo ''
 
 tmp/%.lmtmp:	modules/%module
-	./parse_module < $^
+	./preprocess $^.preproc < $^
+	./parse_module $^ < $^.preproc
 	@touch $@
 
 parse_module:
@@ -34,5 +33,5 @@ clean:
 	@-$(MAKE) -C pass_noodle clean
 
 clean-all:
-	@-rm -rvf src/*.module.c include/*_def.inc*
+	@-rm -rvf src/*.module.c include/*_def.inc* modules/*.preproc
 	@-$(MAKE) -C pass_noodle clean-all

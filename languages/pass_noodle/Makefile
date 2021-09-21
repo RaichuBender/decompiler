@@ -1,15 +1,23 @@
-SOURCES	:=	$(wildcard *.c)
-OBJECTS	:=	$(SOURCES:%.c=%.o)
+EXE_PA	:=	../parse_module
+EXE_PR	:=	../preprocess
 
-EXE	:=	../parse_module
-
+default:		pass_noodle preach_modest
 pass_noodle:		parse_module.gen.h
-	$(MAKE) $(EXE)
+	$(MAKE) $(EXE_PA)
+
+preach_modest:		preprocess.gen.h
+	$(MAKE) $(EXE_PR)
 
 parse_module.gen.h:	parse_module.l
 	flex -o $@ $^
 
-$(EXE):			$(OBJECTS)
+preprocess.gen.h:	preprocess.l
+	flex -o $@ $^
+
+$(EXE_PA):		pass_noodle.o
+	$(CC) -O2 -s $^ -o $@ -lfl -D_SYNTAX -Wno-int-conversion
+
+$(EXE_PR):		preach_modest.o
 	$(CC) -O2 -s $^ -o $@ -lfl -D_SYNTAX -Wno-int-conversion
 
 %.o:			%.c
@@ -17,6 +25,6 @@ $(EXE):			$(OBJECTS)
 
 .PHONY:clean clean-all
 clean:
-	-@rm -vf *.o parse_module.gen.h
+	-@rm -vf *.o *.gen.h
 clean-all:clean
-	-@rm -vf ../parse_module
+	-@rm -vf ../parse_module ../preprocess
