@@ -8,6 +8,7 @@
 
 #include "pass_noodle.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #else // _SYNTAX
@@ -16,31 +17,46 @@
 
 #endif // _SYNTAX
 
+typedef enum
+{
+	LEX_INVALID = 0,
+	LEX_L0,
+	LEX_LANGUAGE,
+} LEX_TYPE;
+
+LEX_TYPE lt;
+#define LEX(_type_)  \
+	{                \
+		lt = _type_; \
+		yylex();     \
+	}
+
 // Final output to be written
 char final_out[4096 * 4096];
 
 // Pointer to output text
-char *	   pTxt				= final_out;
+char *	  pTxt			   = final_out;
 // Common accross all types
-char *	   identifier		= NULL;
-char *	   display_name		= NULL;
-char *	   user_description = NULL;
+char *	  identifier	   = NULL;
+char *	  display_name	   = NULL;
+char *	  user_description = NULL;
 // Type specific
-char *	   architecture		= NULL;
-char *	   language			= NULL;
-char *	   endian			= NULL;
-char *	   address_size		= NULL;
+char *	  architecture	   = NULL;
+char *	  language		   = NULL;
+char *	  endian		   = NULL;
+char *	  address_size	   = NULL;
 // Block end markers
-char *	   end_platform		= NULL;
-char *	   end_architecture = NULL;
-char *	   end_language		= NULL;
-char *	   end_mode			= NULL;
+char *	  end_platform	   = NULL;
+char *	  end_architecture = NULL;
+char *	  end_language	   = NULL;
+char *	  end_mode		   = NULL;
 // Type detected from parsed file
-FILE_TYPE  ftype			= INVALID;
-char *	   type_hdr;
-char *	   type_hdr_upper;
+FILE_TYPE ftype			   = INVALID;
+char *	  type_hdr;
+char *	  type_hdr_upper;
 
 static void parse_level_0(void);
+static void parse_level_1(void);
 static void save_output(void);
 
 char *level_0;
@@ -54,7 +70,7 @@ int main(int argc, const char *argv[])
 	// printf("\nRaichu's Decomp Spec Parser\nv%d.%d\n", VERSION);
 
 	main_argc = argc;
-	main_argv = argv;
+	main_argv = (char **)argv;
 
 	parse_level_0();
 	save_output();
@@ -71,7 +87,8 @@ static void save_output(void)
 	sprintf(file_name, "src/%s.module.c", identifier);
 
 	FILE *fp = fopen(file_name, "wb");
-	fprintf(fp, DO_NOT_EDIT_TEXT "#include \"%s.h\"\n\n%s\n", type_hdr, final_out);
+	fprintf(fp, DO_NOT_EDIT_TEXT "#include \"%s.h\"\n\n", type_hdr);
+	fprintf(fp, "%s\n\n%s\n\n", "#define BYTES *8\n#define BITS *1\n", final_out);
 
 	char def_cmd[1024];
 	sprintf(def_cmd,
@@ -94,6 +111,11 @@ BOOL bPreproc = FALSE;
 static inline void PARSE_PLATFORM_L0(void)
 {
 	DBG_TRACE(PARSE_PLATFORM_L0);
+
+	if ((identifier == NULL) || (architecture == NULL) || (endian == NULL) || (address_size == NULL) ||
+		(end_platform == NULL))
+		FATAL("missing elements", "-", "-", "-");
+
 	ADD_TXT("PLATFORM %1$s =\n{\n\t\"%1$s\",\n", identifier);
 
 	if (display_name != NULL)
@@ -110,18 +132,15 @@ static inline void PARSE_PLATFORM_L0(void)
 	ADD_TXT("\t%s,\n", endian);
 	ADD_TXT("\t%s,\n", address_size);
 	ADD_TXT("};");
-
-	if ((identifier == NULL) || (architecture == NULL) || (endian == NULL) || (address_size == NULL) ||
-		(end_platform == NULL))
-	{
-		FATAL("missing elements");
-		exit(-1);
-	}
 }
 
 static inline void PARSE_ARCHITECTURE_L0(void)
 {
 	DBG_TRACE(PARSE_ARCHITECTURE_L0);
+
+	if ((identifier == NULL) || (language == NULL) || (end_architecture == NULL))
+		FATAL("missing elements", "-", "-", "-");
+
 	ADD_TXT("ARCHITECTURE %1$s =\n{\n\t\"%1$s\",\n", identifier);
 
 	if (display_name != NULL)
@@ -136,17 +155,15 @@ static inline void PARSE_ARCHITECTURE_L0(void)
 
 	ADD_TXT("\t\"%s\",\n", language);
 	ADD_TXT("};");
-
-	if ((identifier == NULL) || (language == NULL) || (end_architecture == NULL))
-	{
-		FATAL("missing elements");
-		exit(-1);
-	}
 }
 
 static inline void PARSE_LANGUAGE_L0(void)
 {
 	DBG_TRACE(PARSE_LANGUAGE_L0);
+
+	if ((identifier == NULL) || (end_language == NULL))
+		FATAL("missing elements", "-", "-", "-");
+
 	ADD_TXT("LANGUAGE %1$s =\n{\n\t\"%1$s\",\n", identifier);
 
 	if (display_name != NULL)
@@ -159,30 +176,21 @@ static inline void PARSE_LANGUAGE_L0(void)
 	else
 		ADD_TXT("\tNO_DESCRIPTION,\n")
 
-	ADD_TXT("};");
-
-	if ((identifier == NULL) || (end_language == NULL))
-	{
-		FATAL("missing elements");
-		exit(-1);
-	}
+	ADD_TXT("};\t// %s", identifier);
 }
 
 static inline void PARSE_MODE_L0(void)
 {
 	DBG_TRACE(PARSE_MODE_L0);
 	// TODO
-	if ((identifier == NULL) || (address_size == NULL) || (end_mode == NULL))
-	{
-		FATAL("missing elements");
-		exit(-1);
-	}
+	if ((identifier == NULL) || (end_mode == NULL))
+		FATAL("missing elements", "-", "-", "-");
 }
 
 static void parse_level_0(void)
 {
 	DBG_TRACE(parse_level_0);
-	yylex();
+	LEX(LEX_L0);
 
 	switch (ftype)
 	{
@@ -203,7 +211,93 @@ static void parse_level_0(void)
 		break;
 
 	default:
-		FATAL("unrecognized spec file type");
-		exit(-1);
+		FATAL("unrecognized spec file type", "-", "-", "-");
 	}
+}
+
+void REGISTOR(char *yytext)
+{
+	DBG_TRACE(REGISTOR);
+
+	char *space = strchr(yytext, L'(') + 1;
+	char *end	= strchr(space, L')');
+	if (end == NULL)
+		return; // TODO bail out and show FATAL ERR
+
+	*(end) = 0;
+
+	free(scope_name[++token_scope]);
+
+	scope_name[token_scope] = malloc(32);
+	sprintf(scope_name[token_scope], "register_store_%s", space);
+
+	ADD_TXT("REGISTER_STORAGE %s =\n{\n", scope_name[token_scope]);
+
+	tmd[token_scope] = REG_SPACE;
+}
+
+void INSTRSET(char *yytext)
+{
+	DBG_TRACE(INSTRSET);
+	char *name			  = strchr(yytext, L'(') + 1;
+	*(strchr(name, L')')) = 0;
+
+	free(scope_name[++token_scope]);
+	scope_name[token_scope] = malloc(32);
+	sprintf(scope_name[token_scope], "%s", name);
+
+	ADD_TXT("INSTRUCTION_SET %s =\n{\n", name);
+
+	INDENT(token_scope);
+	ADD_TXT("/*Name:    */ \"%s\",\n", name);
+
+	tmd[token_scope] = INSTR_SET;
+}
+
+void INSTRUCTION_GROUP(char *yytext)
+{
+	DBG_TRACEL(_INSTRUCTION_GROUP);
+	INDENT(token_scope);
+	ADD_TXT("{ /*INSTRUCTION");
+	INDENT(++token_scope);
+	tmd[token_scope] = INSTR_GROUPING;
+	ADD_TXT("gn\t%s */\n", yytext);
+	INDENT(token_scope);
+	ADD_TXT("\"dummy\",\n");
+}
+
+void INSTRUCTION_GROUP_PARAM(char *yytext)
+{
+	DBG_TRACEL(_INSTRUCTION_GROUP_PARAM);
+	INDENT(token_scope);
+	ADD_TXT("{ /*INSTRUCTION");
+	INDENT(++token_scope);
+	tmd[token_scope] = INSTR_GROUPING;
+	ADD_TXT("gp\t%s */\n", yytext);
+	INDENT(token_scope);
+	ADD_TXT("\"dummy\",\n");
+}
+
+void INSTRUCTION_(char *yytext)
+{
+	DBG_TRACEL(_INSTRUCTION);
+	INDENT(token_scope);
+	ADD_TXT("{ /*INSTRUCTION");
+	INDENT(++token_scope);
+	tmd[token_scope] = INSTR;
+	ADD_TXT("sn\t%s */\n", yytext);
+	INDENT(token_scope);
+	ADD_TXT("\"dummy\",\n");
+}
+
+void INSTRUCTION_PARAM(char *yytext)
+{
+	DBG_TRACEL(_INSTRUCTION_PARAM);
+	INDENT(token_scope);
+	ADD_TXT("{ /*INSTRUCTION");
+	INDENT(++token_scope);
+	tmd[token_scope] = INSTR;
+	ADD_TXT("sp\t%s */\n", yytext);
+	INDENT(token_scope);
+	ADD_TXT("\"dummy\",\n");
 }

@@ -1,5 +1,6 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
+
 //				Maj   Mnr
 #define VERSION 0x00, 0x01
 
@@ -9,6 +10,26 @@
 #ifndef NULL
 #define NULL (0)
 #endif
+
+// ## Lexer globals
+extern char *storage;
+typedef enum
+{
+	UNSPECIFIED = 0,
+	REG_SPACE,
+	REGISTER,
+	FLAG,
+	INSTR_SET,
+	INSTR,
+	INSTR_GROUPING,
+	LOGIC,
+} TOKEN_MODE;
+
+#define SCOPE_MAX_DEPTH 2048
+extern int		  token_scope;
+extern TOKEN_MODE tmd[SCOPE_MAX_DEPTH];
+extern char *	  scope_name[SCOPE_MAX_DEPTH];
+// ## -
 
 #define NULL_TERM '\0'
 
@@ -149,10 +170,11 @@ typedef unsigned char BOOL;
 
 #endif // _SYNTAX
 
-#define DBG_TRACE(sym)                                  \
-	{                                                   \
-		fprintf(stderr, "%s: *(0x%08x)\n", #sym, &sym); \
-	}
+#define DBG_TRACE(sym)
+// #define DBG_TRACE(sym)                                  \
+// 	{                                                   \
+// 		fprintf(stderr, "%s: *(0x%08x)\n", #sym, &sym); \
+// 	}
 #define DBG_TRACEL(sym)                \
 	{                                  \
 		fprintf(stderr, "%s\n", #sym); \
@@ -168,7 +190,6 @@ typedef unsigned char BOOL;
 	{                               \
 		pTxt += sprintf(pTxt, fmt); \
 	}
-
 
 #ifndef _DBG_DUMP
 

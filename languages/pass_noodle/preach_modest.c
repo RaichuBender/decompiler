@@ -8,6 +8,7 @@
 
 #include "preach_modest.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #else // _SYNTAX
@@ -41,7 +42,7 @@ int main(int argc, const char *argv[])
 	yylex();
 
 	main_argc = argc;
-	main_argv = argv;
+	main_argv = (char **)argv;
 
 	save_output();
 
@@ -172,7 +173,9 @@ static void EXPAND_MACRO(char *macro_begin)
 
 	char *expand = strstr(macro_begin, "=BEGIN");
 	for (char *c = macro_begin; c < expand; ++c)
-		if ((*c != ' ') && (*c != '\t') && (*c != '\n'))
+		if ((*c != ' ')
+		&&  (*c != '\t')
+		&&  (*c != '\n'))
 			expand = NULL;
 
 	if (expand == NULL)
@@ -317,12 +320,7 @@ static void REPLACE_MACRO(char *yytext)
 
 	char *name = malloc(sz);
 	memcpy(name, yytext + 2, sz);
-
-	// OUTPUT_DBG_DOC("/* %s */\n", name);
-
 	name[sz] = NULL_TERM;
-
-	int argc = 0;
 
 	MACRO *macro = malloc(sizeof(MACRO));
 
@@ -332,6 +330,7 @@ static void REPLACE_MACRO(char *yytext)
 	char *arglist = strchr(label, L'(');
 	*(arglist++)  = NULL_TERM;
 
+	int argc		  = 0;
 	macro->argv		  = malloc(3 * sizeof(char *));
 	macro->argv[argc] = malloc(strlen(label));
 	strcpy(macro->argv[argc++], label);
@@ -373,7 +372,7 @@ static void REPLACE_MACRO(char *yytext)
 		while ((endarg[-1] == ' ') || (endarg[-1] == '\t'))
 			*(--endarg) = NULL_TERM;
 
-		macro->argv[argc] = malloc(strlen(arg));
+		macro->argv[argc] = malloc(strlen(arg) + 1);
 		strcpy(macro->argv[argc++], arg);
 	}
 

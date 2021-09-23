@@ -4,7 +4,7 @@ LANGUAGE(sm83_asm)
 	DisplayName: Game Boy SM83 (Z80) asm
 
 	REGISTER_STORAGE(0x00)
-	{
+	#: Regular
 		Size:	12 BYTES
 
 		REGISTER(AF)
@@ -12,70 +12,70 @@ LANGUAGE(sm83_asm)
 			Mapping:	0x00
 			Size:		16 BITS
 			Purpose: 	GENERAL
-		}
+		},
 		REGISTER(A)
 		{
 			Mapping:	0x00
 			Size:		8 BITS 
 			Purpose:	GENERAL
-		}
+		},
 
 		REGISTER(BC)
 		{
 			Mapping:	0x10
 			Size:		16 BITS
 			Purpose: 	GENERAL
-		}
+		},
 		REGISTER(B)
 		{
 			Mapping:	0x10
 			Size:		8 BITS 
 			Purpose:	GENERAL
-		}
+		},
 		REGISTER(C)
 		{
 			Mapping:	0x18
 			Size:		8 BITS 
 			Purpose:	GENERAL
-		}
+		},
 
 		REGISTER(DE)
 		{
 			Mapping:	0x20
 			Size:		16 BITS
 			Purpose: 	GENERAL
-		}
+		},
 		REGISTER(D)
 		{
 			Mapping:	0x20
 			Size:		8 BITS 
 			Purpose:	GENERAL
-		}
+		},
 		REGISTER(E)
 		{
 			Mapping:	0x28
 			Size:		8 BITS 
 			Purpose:	GENERAL
-		}
+		},
 
 		REGISTER(HL)
 		{
 			Mapping:	0x30
 			Size:		16 BITS
 			Purpose: 	GENERAL
-		}
+		},
 		REGISTER(H)
 		{
 			Mapping:	0x30
 			Size:		8 BITS 
 			Purpose:	GENERAL
-		}
+		},
 		REGISTER(L)
 		{
 			Mapping:	0x38
 			Size:		8 BITS 
 			Purpose:	GENERAL
-		}
+		},
 
 
 		REGISTER(PC)
@@ -83,64 +83,73 @@ LANGUAGE(sm83_asm)
 			Mapping:	0x40
 			Size:		16 BITS
 			Purpose: 	PROGRAM_COUNTER
-		}
+		},
 		REGISTER(SP)
 		{
 			Mapping:	0x50
 			Size:		16 BITS
 			Purpose: 	STACK_POINTER
-		}
+		},
 
 		REGISTER(F)
 		{
 			Mapping:	0x08
 			Size:		8 BITS
-			Purpose:	FLAG
-		}
+			Purpose:	FLAGS
+		},
 
 		FLAG(ZF)
 		{
 			Mapping: 	0x0f
-		}
+		},
 		FLAG(NF)
 		{
 			Mapping: 	0x0e
-		}
+		},
 		FLAG(HF)
 		{
 			Mapping: 	0x0d
-		}
+		},
 		FLAG(CF)
 		{
 			Mapping: 	0x0c
 		}
-	}
 
-	INSTRUCTION_SET	( REGULAR )
-	{
+	END_REGISTER_STORAGE
+
+	INSTRUCTION_SET(REGULAR)
+	#: All non-CB instructions
+
+	# Misc
+		"NOP":		0x00	1 4
+		{
+			NO_OP;
+		}
+
+		"STOP 0":	0x10	2 4
+		{
+			NO_OP;
+		}
+
+		"HALT":		0x76	1 4
+		{
+			NO_OP;
+		}
 
 	# 8-bit Loads:
 MACRO:LOAD( _REG_, _OP_B_ )
 =BEGIN
-		"LD _REG_, %s": GROUP( _OP_B_, 8 )
+		"LD _REG_, %s": GROUP( _OP_B_, 1, 8 )
 		{
-			Param[0]:	{	 B      C      D      E      H      L     *(HL)   A    }
-			Repr[0]:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			Cycles:		{	 4      4      4      4      4      4      8      4    }
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
 
-			Logic
 			{
-				REG_LOAD	_REG_, Param[0];
+				LOAD REG	_REG_, PARAM[0];
 			}
 		}
-=END
-
-MACRO:TEST1( _TEST_ )
-=BEGIN
-=END
-
-MACRO:TEST2( _TEST_ )
-=BEGIN
 =END
 
 		^%LOAD( B, 0x40 )
@@ -150,32 +159,303 @@ MACRO:TEST2( _TEST_ )
 		^%LOAD( H, 0x60 )
 		^%LOAD( L, 0x68 )
 
-		"LD (HL), %s": GROUP( 0x70, 6 )
+		"LD (HL), %s": GROUP( 0x70, 1, 6 )
 		{
-			Param[0]:	{	 B      C      D      E      H      L    }
-			 Repr[0]:	{	"B"    "C"    "D"    "E"    "H"    "L"   }
-			  Cycles:	{	 4      4      4      4      4      4    }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)    }
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"   }
+			INSTR_COUNT:	1
+			CYCLES:			8
 
-			Logic
 			{
-				REG_LOAD	*(HL), Param[0];
+				LOAD, REG_ADR(HL) PARAM[0];
 			}
 		}
 
-		"LD (HL), A": 0x77
+		"LD (HL), A": 0x77	1 8
 		{
-			  Cycles:	4
-
-			Logic
-			{
-				REG_LOAD	*(HL), Param[0];
-			}
+			LOAD, REG_ADR(HL), REG(A);
 		}
 
 		^%LOAD( A, 0x78 )
-	}
 
-	INSTRUCTION_SET	( CB )
-	{}
+		"LD %s, %02x", IMM8: GROUP( 0x06, 8, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	2
+			CYCLES:	{	 4      4      4      4      4      4      12     4    }
+
+			{
+				LOAD PARAM[0], CONST(IMM8);
+			}
+		}
+
+	# 16-bit Loads:
+		"LD %s, A", IMM8: GROUP( 0x06, 16, 2 )
+		{
+			REPR:	{	"(BC)"    "(DE)"    "(HL+)"    "(HL-)"   }
+			PARAM:	{	REG_ADR(BC)     REG_ADR(DE)     REG_ADR(HL)   REG_ADR(HL)  }
+			INSTR_COUNT:	1
+			CYCLES:			8
+
+			{
+				LOAD	PARAM[0], REG(A);
+			}
+		}
+
+		"LD (HL+), A", IMM8:	0x26	1 8
+		{
+			LOAD			REG_ADR(HL), REG(A);
+			ARITHMETIC ADD	REG(HL), CONST(1);
+		}
+
+		"LD (HL-), A", IMM8:	0x36	1 8
+		{
+			LOAD			REG_ADR(HL), REG(A);
+			ARITHMETIC SUB	REG(HL), CONST(1);
+		}
+
+	# 8-bit Arithmetic:
+		"INC %s": GROUP( 0x04, 8, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      12     4    }
+
+			{
+				ARITHMETIC ADD	PARAM[0], CONST(1);
+
+				LOAD FLAG(ZF), CONDITION(PARAM[0] == 0);
+				LOAD FLAG(NF), CONST(false);
+				LOAD FLAG(HF), CONDITION(PARAM[0].nl > 0xf);
+			}
+		}
+
+		"DEC %s": GROUP( 0x05, 8, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      12     4    }
+
+			{
+				ARITHMETIC SUB	PARAM[0], CONST(1);
+
+				LOAD FLAG(ZF), CONDITION(PARAM[0] == 0);
+				SETFLAG ZF, PARAM[0] == 0;
+				SETFLAG NF, true;
+				SETFLAG HF, PARAM[0].nl > 0xf;
+			}
+		}
+
+
+		"ADD A, %s": GROUP( 0x80, 1, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+
+			{
+				ARITHMETIC ADD	REG(A), PARAM[0];
+
+				SETFLAG ZF, A == 0;
+				SETFLAG NF, false;
+				SETFLAG HF, A.nl > 0xf;
+				SETFLAG CF, A > 0xff;
+			}
+		}
+
+		"ADD A, 0x%02x", IMM8: 0xc6	2 8
+		{
+			ARITHMETIC ADD	REG(A), CONST(IMM8);
+
+			SETFLAG ZF, A == 0;
+			SETFLAG NF, false;
+			SETFLAG HF, A.nl > 0xf;
+			SETFLAG CF, A > 0xff;
+		}
+
+
+		"ADC A, %s": GROUP( 0x88, 1, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+
+			{
+				ARITHMETIC ADD	REG(A), FLAG(CF);
+				ARITHMETIC ADD	REG(A), PARAM[0];
+
+				SETFLAG ZF, A == 0;
+				SETFLAG NF, false;
+				SETFLAG HF, A.nl > 0xf;
+				SETFLAG CF, A > 0xff;
+			}
+		}
+
+		"ADC A, 0x%02x", IMM8: 0xce	2 8
+		{
+			ARITHMETIC ADD	REG(A), FLAG(CF);
+			ARITHMETIC ADD	REG(A), CONST(IMM8);
+
+			SETFLAG ZF, A == 0;
+			SETFLAG NF, false;
+			SETFLAG HF, A.nl > 0xf;
+			SETFLAG CF, A > 0xff;
+		}
+
+
+		"SUB %s": GROUP( 0x90, 1, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+
+			{
+				ARITHMETIC SUB	REG(A), PARAM;
+
+				SETFLAG ZF, A == 0;
+				SETFLAG NF, true;
+				SETFLAG HF, A.nl > 0xf;
+				SETFLAG CF, A > 0xff;
+			}
+		}
+
+		"SUB A, 0x%02x", IMM8: 0xd6	2 8
+		{
+			ARITHMETIC SUB	REG(A), CONST(IMM8);
+
+			SETFLAG ZF, A == 0;
+			SETFLAG NF, true;
+			SETFLAG HF, A.nl > 0xf;
+			SETFLAG CF, A > 0xff;
+		}
+
+
+		"SBC A, %s": GROUP( 0x98, 1, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+
+			{
+				REG_SUB	A, PARAM[0] + CF;
+
+				SETFLAG ZF, A == 0;
+				SETFLAG NF, true;
+				SETFLAG HF, A.nl > 0xf;
+				SETFLAG CF, A > 0xff;
+			}
+		}
+
+		"SBC A, 0x%02x", IMM8: 0xde	2 8
+		{
+			REG_SUB	A, IMM8 + CF;
+
+			SETFLAG ZF, A == 0;
+			SETFLAG NF, true;
+			SETFLAG HF, A.nl > 0xf;
+			SETFLAG CF, A > 0xff;
+		}
+
+
+		"AND %s": GROUP( 0xa0, 1, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+
+			{
+				ARITHMETIC ADD	REG(A), PARAM[0];
+			}
+		}
+
+		"AND %02x", IMM8: 0xe6	2 8
+		{
+			ARITHMETIC ADD	REG(A), PARAM[0];
+		}
+
+
+		"XOR %s": GROUP( 0xa8, 1, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+
+			{
+				ARITHMETIC ADD	REG(A), PARAM[0];
+			}
+		}
+
+		"XOR %02x", IMM8: 0xee	2 8
+		{
+			ARITHMETIC ADD	REG(A), PARAM[0];
+		}
+
+
+		"OR %s": GROUP( 0xb0, 1, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+
+			{
+				ARITHMETIC ADD	REG(A), PARAM[0];
+			}
+		}
+
+		"OR %02x", IMM8: 0xf6	2 8
+		{
+			ARITHMETIC ADD	REG(A), PARAM[0];
+		}
+
+
+		"CP A, %s": GROUP( 0xb8, 1, 8 )
+		{
+			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			INSTR_COUNT:	1
+			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+
+			{
+				local a = A;
+				REG_SUB	A, PARAM[0];
+
+				SETFLAG ZF, A == 0;
+				SETFLAG NF, true;
+				SETFLAG HF, A.nl > 0xf;
+				SETFLAG CF, A > 0xff;
+
+				A = a;
+			}
+		}
+
+		"CP %02x", IMM8: 0xfe	2 8
+		{
+			local a = A;
+			REG_SUB	A, IMM8;
+
+			SETFLAG ZF, A == 0;
+			SETFLAG NF, true;
+			SETFLAG HF, A.nl > 0xf;
+			SETFLAG CF, A > 0xff;
+
+			A = a;
+		}
+
+	END_INSTRUCTION_SET
+	# ...
+
+	INSTRUCTION_SET(CB)
+	#: ...
+	END_INSTRUCTION_SET
 
 END_LANGUAGE

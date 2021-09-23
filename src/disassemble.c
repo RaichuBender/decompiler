@@ -1,70 +1,106 @@
 #include "disassemble.h"
+#include "sys/common.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 // !!! TODO !!!
 // BYTE   MEM[0x8000][64] = {0};
 // BYTE **MEM_BLOCKS = MEM;
 
-static int decode_opcode(INSTRUCTION *pINSTR, BYTE *raw_bytes);
-
 /**
  * @name		disassemble_block
- * @brief		Disassemble a code block by specifying the size
+ * @brief		Disassemble a code block by specifying the @p size
  *
- * @param pppDASM Pointer to resulting string sequence of disassembled instructions,
- * 				NULL if none
- * @param loc	Offset of the instruction data
- * @param size	Size of instruction data in bytes
+ * @param[out]	pppINSTR Pointer to resulting instruction sequence,
+ * 						@a NULL if none
+ * @param[in]	MEM Pointer to the start of the
+ * 					binary's memory
+ * @param[in]	loc	Offset of the instruction data
+ * @param[in]	size Size of instruction data in bytes
  *
- * @returns		Integer containing bytes advanced
- * 				Use to check size difference
+ * @returns		Integer containing bytes advanced.
+ * 				If instructions are aligned, this
+ * 				is equal to @p size
  */
-int disassemble_block(BYTE *MEM, const char ***pppDASM, int loc, size_t size)
+int disassemble_block(INSTRUCTION ***pppINSTR, BYTE *MEM, u32 loc, size_t size)
 {
-	if (pppDASM == NULL)
+	if (pppINSTR == NULL)
 		return -1;
 
-	const char **ret_list = malloc(size);
+	INSTRUCTION **ret_buf	  = NULL;
+	int			  advance	  = 0;
+	u32			  instr_count = 0;
 
-	for (int i = 0; (i < size) && (loc < size); ++i)
-		loc += disassemble_single(MEM, &ret_list[i], loc);
+	for (int i = 0; advance < size; ++i)
+	{
+		INSTRUCTION *pINSTR = disassemble_single(MEM, loc + advance);
+		if (pINSTR == NULL)
+			return -1;
 
-	*pppDASM = ret_list;
+		advance += pINSTR->operand_count;
 
-	return loc;
+		INSTRUCTION **buf = malloc((instr_count + 2) * sizeof(INSTRUCTION *));
+
+		if (ret_buf != NULL)
+		{
+			for (int j = 0; j < instr_count; ++j)
+				buf[j] = ret_buf[j];
+
+			free(ret_buf);
+		}
+
+		buf[instr_count++] = pINSTR;
+		buf[instr_count]   = NULL;
+		ret_buf			   = buf;
+	}
+
+	(*pppINSTR) = ret_buf;
+
+	return advance;
 }
 
 /**
  * @name		disassemble_single
- * @brief		Disassemble a single instruction from loc
+ * @brief		Disassemble a single instruction from @p loc
  *
- * @param ppDASM	The resulting disassembly string
- * @param loc	Offset of the instruction data
+ * @param[in]	MEM Pointer to the start of the
+ * 					binary's memory
+ * @param[in]	loc	Offset of the instruction data
  *
- * @returns		Integer containing bytes advanced
+ * @returns		Pointer to disassembled instruction structure
  */
-int disassemble_single(BYTE *MEM, const char **ppDASM, int loc)
+INSTRUCTION *disassemble_single(BYTE *MEM, u32 loc)
 {
-	if (ppDASM == NULL)
-		return -1;
+	INSTRUCTION *pINSTR = decode_opcode(MEM + loc);
 
-	INSTRUCTION *pINSTR = malloc(sizeof(INSTRUCTION));
-	BYTE *		 pDATA = MEM + loc;
-
-	int advance_pc = decode_opcode(pINSTR, pDATA);
-
-	*ppDASM = pINSTR->mnemonic;
-	return advance_pc;
+	return pINSTR;
 }
 
-static int decode_opcode(INSTRUCTION *pINSTR, BYTE *raw_bytes)
+u16 tmpadr = 0;
+char tmprp[8][5] = {"B","C","D","E","H","L","(HL)","A"};
+
+/**
+ * @name		decode_opcode
+ * @brief		Disassemble instruction pointed to
+ *
+ * @param[in]	raw_bytes Pointer to instruction in memory to decode
+ *
+ * @returns		Pointer to resulting decoded instruction data
+ */
+INSTRUCTION *decode_opcode(BYTE *raw_bytes)
 {
-	// pINSTR = malloc(sizeof(INSTRUCTION));
+	if (raw_bytes == NULL)
+		return NULL;
 
-	pINSTR->mnemonic = "TO IMPLEMENT";
-	pINSTR->operand_count = 1;
-	pINSTR->attributes.type = NO_OP;
+	INSTRUCTION *pINSTR = malloc(sizeof(INSTRUCTION));
+	char *		 mnm	= malloc(32);
+	sprintf(mnm, "LD %s, %s", tmprp[tmpadr], "A");
 
-	return 1;
+	pINSTR->mnemonic		= mnm;
+	pINSTR->operand_count	= 1;
+	pINSTR->addr			= tmpadr++;
+	pINSTR->attributes.type = LOAD;
+
+	return pINSTR;
 }

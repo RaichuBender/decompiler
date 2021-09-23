@@ -82,25 +82,25 @@ MACRO:[a-zA-Z0-9_]+?.*?\n		{
 	++macro_count;
 }
 
+\^%.+?\(\s*\).*?\n	{
+	DBG_TRACEL(replace);
+	dbg_printf("%s ::\n%s\n\n\n", "\\^%.+?\\(.*?\\)", yytext);
+	REPLACE_MACRO(yytext);
+}
+
 \^%.+?\(.+?\).*?\n		{
 	DBG_TRACEL(replace);
 	dbg_printf("%s ::\n%s\n\n\n", "\\^%.+?\\(.*?\\)", yytext);
 	REPLACE_MACRO(yytext);
 }
 
-\^%.+?\(\).*?\n	{
+\^%.+?\s*	{
 	DBG_TRACEL(replace);
 	dbg_printf("%s ::\n%s\n\n\n", "\\^%.+?\\(.*?\\)", yytext);
 	REPLACE_MACRO(yytext);
 }
 
-\^%.+?\n	{
-	DBG_TRACEL(replace);
-	dbg_printf("%s ::\n%s\n\n\n", "\\^%.+?\\(.*?\\)", yytext);
-	REPLACE_MACRO(yytext);
-}
-
-.		{	ADD_TXT(yytext);	}
+.		{	ADD_TXT("%c", *yytext);	}
 \n		{	ADD_TXT(yytext);	}
 
 %%

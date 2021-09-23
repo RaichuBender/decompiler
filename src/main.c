@@ -1,23 +1,16 @@
 #include "disassemble.h"
 #include "language.h"
-#include "typedefs.h"
+#include "sys/common.h"
 #include <stdio.h>
 #include <stdlib.h>
 
-// extern BYTE MEM[0x8000][64];
+#define TEST_FILE ".pokeyellow.gbc"
 
 BYTE *MEM;
 
-/**
- * @name main
- * @brief The main function
- * @param argc Argument count
- * @param argv Arguments
- */
-s32 main(s32 argc, ARG_LIST argv)
+int main(int argc, const char *argv[])
 {
-	FILE *fp = fopen("pokeyellow.gbc", "rb");
-	
+	FILE *fp = fopen(TEST_FILE, "rb");
 	if (fp == NULL)
 		exit(-1);
 
@@ -26,19 +19,13 @@ s32 main(s32 argc, ARG_LIST argv)
 	fseek(fp, 0L, SEEK_SET);
 
 	MEM = malloc(sz);
-
 	fread(MEM, 1, sz, fp);
 
-	char **dasm;
+	INSTRUCTION **ppINSTR;
+	EVAL(disassemble_block(&ppINSTR, MEM, 0, 8));
 
-	disassemble_block(MEM, &dasm, 0, 8);
-
-	for (int i = 0; i != 8; ++i)
-		printf("%s\n", dasm[i]);
+	for (int i = 0; ppINSTR[i] != NULL; ++i)
+		printf("%04x:  %02x    %s\n", ppINSTR[i]->addr, MEM[i], ppINSTR[i]->mnemonic);
 
 	return 0;
 }
-
-/*	Yes, talk about overdoing things...
-	I used this file to test
-	syntax highlighting. */

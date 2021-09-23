@@ -3,7 +3,7 @@
 
 #include "typedefs.h"
 
-typedef enum
+typedef enum _LOGIC_TYPE
 {
 	NO_OP,
 	ARITHMETIC,
@@ -23,7 +23,8 @@ typedef enum
 	CONST,
 	REG_ADR,
 	OP_ADR,
-	CONST_ADR
+	CONST_ADR,
+	FLAG
 } AFFECTS;
 
 typedef struct
@@ -54,15 +55,17 @@ typedef struct
 	u32		  operand2;
 } LOGIC;
 
-typedef struct
+typedef struct _INSTRUCTION
 {
-	const char *mnemonic;
+	char *			 mnemonic;
 #ifdef _UNINDEXED
-	u8 opcode;
+	u8				 opcode;
 #endif // _UNINDEXED
-	s32				 operand_count;
-	s32				 cycles;
+	u64				 addr;
+	u32				 operand_count;
+	u32				 cycles;
 	INSTRUCTION_ATTR attributes;
+	u32				 logic_count;
 	LOGIC *			 logic;
 } INSTRUCTION;
 
