@@ -1,13 +1,13 @@
 #**********************************
 #
 #	 @file      common.mk
-#	 @author    Thomas Gijsbers
+#	 @author    Thomas Gijsbers (@RaichuBender)
 #	 @brief     Common definitions
 #				across most rules
 #	 @version   0.1
 #	 @date      2021／09／24
 #
-#	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+#	 @copyright  © Copyright 2021 — Thomas Gijsbers
 #	           	   All rights reserved.
 #
 #**********************************
