@@ -1,3 +1,15 @@
+/**********************************
+*
+*	 @file      common.h
+*	 @author    Thomas Gijsbers
+*	 @brief     
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+**********************************/
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
@@ -29,7 +41,6 @@ typedef enum
 extern int		  token_scope;
 extern TOKEN_MODE tmd[SCOPE_MAX_DEPTH];
 extern char *	  scope_name[SCOPE_MAX_DEPTH];
-// ## -
 
 #define NULL_TERM '\0'
 
@@ -39,6 +50,17 @@ typedef unsigned char BOOL;
 #define FALSE (0)
 #endif
 
+/**********************************
+*
+*	 @brief	Same as snprintf,
+*			pretty much...
+*
+*    @param[in] bufsz	Buffer size
+*    @param[in] fmt...	Format string
+*
+*    @return	formatted char buffer
+*
+**********************************/
 #define FBUF(bufsz, fmt...) \
 	({                      \
 		char buf[bufsz];    \
@@ -46,66 +68,62 @@ typedef unsigned char BOOL;
 		buf;                \
 	})
 
-#define C_BLACK	   "\033[0;30m" // COLOR black (regular)
-#define C_RED	   "\033[0;31m" // COLOR red (regular)
-#define C_GREEN	   "\033[0;32m" // COLOR green (regular)
-#define C_YELLOW   "\033[0;33m" // COLOR yellow (regular)
-#define C_BLUE	   "\033[0;34m" // COLOR blue (regular)
-#define C_MAGENTA  "\033[0;35m" // COLOR magenta (regular)
-#define C_CYAN	   "\033[0;36m" // COLOR cyan (regular)
-#define C_WHITE	   "\033[0;37m" // COLOR white (regular)
-
-#define F_BOLD	   "\033[1m" // FORMAT bold
-#define F_RESET	   "\033[0m" // FORMAT reset
-
-#define CB_BLACK   C_BLACK F_BOLD	// COLOR black (bold)
-#define CB_RED	   C_RED F_BOLD		// COLOR red (bold)
-#define CB_GREEN   C_GREEN F_BOLD	// COLOR green (bold)
-#define CB_YELLOW  C_YELLOW F_BOLD	// COLOR yellow (bold)
-#define CB_BLUE	   C_BLUE F_BOLD	// COLOR blue (bold)
-#define CB_MAGENTA C_MAGENTA F_BOLD // COLOR magenta (bold)
-#define CB_CYAN	   C_CYAN F_BOLD	// COLOR cyan (bold)
-#define CB_WHITE   C_WHITE F_BOLD	// COLOR white (bold)
+#include "sys/terminal_colors.h"
 
 // #define _ASCII_MONOCHROME
 
 #ifndef _SYNTAX
 
-/**
- * @name	WARN
- * @brief	Shows diagnostics upon non-fatal error
- * @param[in] 	fmt			Format string for warning message
- * @param[in] __VA_ARGS__	Variables to be formatted
- * @param[in] 	in			Code line/fragment causing trouble
- * @param[in] 	at			Idiot
- */
+/**********************************
+*
+*    @name	WARN
+*
+*    @brief	Shows diagnostics
+*			upon non-fatal error
+*
+*    @param[in]   fmt		Format string for warning message
+*    @param[in] __VA_ARGS__	Variables to be formatted
+*    @param[in]   in		Code line/fragment causing trouble
+*    @param[in]   at		Idiot
+*
+**********************************/
 #define WARN(fmt, ...)	;
 
-/**
- * @name	FATAL
- * @brief	Aborts execution and shows diagnostics
- * @param[in] 	fmt			Format string for error message
- * @param[in] __VA_ARGS__	Variables to be formatted
- * @param[in] 	in			Code line/fragment causing the error
- * @param[in] 	at			Idiot
- */
+/**********************************
+*
+*    @name	FATAL
+*
+*    @brief	Aborts execution
+*			and shows diagnostics
+*
+*    @param[in]   fmt		Format string for error message
+*    @param[in] __VA_ARGS__	Variables to be formatted
+*    @param[in]   in		Code line/fragment causing the error
+*    @param[in]   at		Idiot
+*
+**********************************/
 #define FATAL(fmt, ...) ;
 
 #else // _SYNTAX
 
-/**
- * @name	WARN
- * @brief	Shows diagnostics upon non-fatal error
- * @param[in] 	fmt			Format string for warning message
- * @param[in] __VA_ARGS__	Variables to be formatted
- * @param[in] 	in			Code line/fragment causing trouble
- * @param[in] 	at			Idiot
- */
+/**********************************
+*
+*    @name	WARN
+*
+*    @brief	Shows diagnostics
+*			upon non-fatal error
+*
+*    @param[in]   fmt		Format string for warning message
+*    @param[in] __VA_ARGS__	Variables to be formatted
+*    @param[in]   in		Code line/fragment causing trouble
+*    @param[in]   at		Idiot
+*
+**********************************/
 #ifndef _ASCII_MONOCHROME
+
 #define WARN(fmt, ...)                                                                                        \
 	{                                                                                                         \
-		fprintf(stderr, CB_MAGENTA                                                                            \
-				"\nWARNING  " CB_WHITE fmt C_BLUE "\n >> " C_MAGENTA " ⮞"                                   \
+		fprintf(stderr, CB_MAGENTA "\nWARNING  " CB_WHITE fmt C_BLUE "\n >> " C_MAGENTA " ⮞"              \
 				" " C_CYAN "in: " C_MAGENTA "\"" C_WHITE "%s" C_MAGENTA "\"" C_BLUE "\n >> " C_MAGENTA " ⮞" \
 				" " C_CYAN "at: " C_MAGENTA "\"" C_WHITE "%s" C_MAGENTA "\"\n\n" CB_MAGENTA "  ⏺ "          \
 				" " CB_CYAN "%s\n\n" F_RESET __VA_OPT__(, ) __VA_ARGS__);                                     \
@@ -114,7 +132,11 @@ typedef unsigned char BOOL;
 				" at: \"%s\"\n\n  ⏺ "                                                                       \
 				" %s\n*/" __VA_OPT__(, ) __VA_ARGS__);                                                        \
 	}
+
+// TODO check if symbols render correctly on other terminal emulators (1 of 2)
+
 #else // _ASCII_MONOCHROME
+
 #define WARN(fmt, ...)                                                                               \
 	{                                                                                                \
 		fprintf(stderr, "\n"                                                                         \
@@ -135,14 +157,18 @@ typedef unsigned char BOOL;
 
 #endif // _ASCII_MONOCHROME
 
-/**
- * @name	FATAL
- * @brief	Aborts execution and shows diagnostics
- * @param[in] 	fmt			Format string for error message
- * @param[in] __VA_ARGS__	Variables to be formatted
- * @param[in] 	in			Code line/fragment causing the error
- * @param[in] 	at			Idiot
- */
+/**********************************
+*
+*	 @name	FATAL
+*
+*    @brief	Aborts execution and shows diagnostics
+*
+*    @param[in]   fmt		Format string for error message
+*    @param[in] __VA_ARGS__	Variables to be formatted
+*    @param[in]   in		Code line/fragment causing the error
+*    @param[in]   at		Idiot 
+*
+**********************************/
 #ifndef _ASCII_MONOCHROME
 #define FATAL(fmt, ...)                                                                                               \
 	{                                                                                                                 \
@@ -152,7 +178,11 @@ typedef unsigned char BOOL;
 							   " " CB_YELLOW "%s\n\n" F_RESET __VA_OPT__(, ) __VA_ARGS__);                            \
 		exit(-1);                                                                                                     \
 	}
+
+// TODO check if symbols render correctly on other terminal emulators (2 of 2)
+
 #else // _ASCII_MONOCHROME
+
 #define FATAL(fmt, ...)                                                                              \
 	{                                                                                                \
 		fprintf(stderr, "\n"                                                                         \
@@ -166,11 +196,35 @@ typedef unsigned char BOOL;
 						"+=======================================+\n\n" __VA_OPT__(, ) __VA_ARGS__); \
 		exit(-1);                                                                                    \
 	}
+
 #endif // _ASCII_MONOCHROME
 
 #endif // _SYNTAX
 
-#define DBG_TRACE(sym)
+#define ASSERT(cond)                                                                               \
+	{                                                                                              \
+		if (!(cond))                                                                               \
+			FATAL("assertion failed", ({                                                           \
+					  char IN[64];                                                                 \
+					  sprintf(IN, "%s:%d", __FILE__, __LINE__);                                    \
+					  IN;                                                                          \
+				  }),                                                                              \
+				   CB_WHITE "ASSERT" C_YELLOW " ( " CB_CYAN #cond C_YELLOW " )", "That's not good..."); \
+	}
+
+/* Quickly disable assertiom by simply adding a 'd' in front */
+#define dASSERT(cond)
+
+#ifndef _TRACE_FILENAME
+#define TRACE_CODE(code)                                    \
+	fprintf(stderr, __FILE__ ":%d: %s\n", __LINE__, #code); \
+	code;
+#else // _TRACE_FILENAME
+#define TRACE_CODE(code)            \
+	fprintf(stderr, "%s\n", #code); \
+	code;
+#endif // _TRACE_FILENAME
+#define DBG_TRACE(sym) 
 // #define DBG_TRACE(sym)                                  \
 // 	{                                                   \
 // 		fprintf(stderr, "%s: *(0x%08x)\n", #sym, &sym); \
@@ -180,12 +234,18 @@ typedef unsigned char BOOL;
 		fprintf(stderr, "%s\n", #sym); \
 	}
 
-/**
- * @name	ADD_TXT
- * @brief	Unconditionally append (formatted) text to the output file
- * @param[in] 	fmt			Format string to be written
- * @param[in] __VA_ARGS__	Variables to be formatted
- */
+/**********************************
+*
+*	 @name	ADD_TXT
+*
+*    @brief	Unconditionally append
+*			(formatted) text to the
+*			output file
+*
+*    @param[in]   fmt		Format string to be written
+*    @param[in] __VA_ARGS__	Variables to be formatted
+*
+**********************************/
 #define ADD_TXT(fmt...)             \
 	{                               \
 		pTxt += sprintf(pTxt, fmt); \
@@ -193,45 +253,70 @@ typedef unsigned char BOOL;
 
 #ifndef _DBG_DUMP
 
-/**
- * @name	DBG_DUMP
- * @brief	Append (formatted) debug text to the output file,
- * 			if enabled
- * @param[in] 	fmt			Format string to be written
- * @param[in] __VA_ARGS__	Variables to be formatted
- */
+
+/**********************************
+*
+*    @name	DBG_DUMP
+*
+*    @brief	Append (formatted) debug
+*			text to the output file,
+*    		if enabled
+*
+*    @param[in]   fmt		Format string to be written
+*    @param[in] __VA_ARGS__	Variables to be formatted
+*
+**********************************/
 #define DBG_DUMP(fmt, ...)
 #else // _DBG_DUMP
 
-/**
- * @name	DBG_DUMP
- * @brief	Append (formatted) debug text to the output file,
- * 			if enabled
- * @param[in] 	fmt			Format string to be written
- * @param[in] __VA_ARGS__	Variables to be formatted
- */
+/**********************************
+*
+*    @name	DBG_DUMP
+*    
+*    @brief	Append (formatted) debug
+*    		text to the output file,
+*    		if enabled
+*    
+*    @param[in]   fmt		Format string to be written
+*    @param[in] __VA_ARGS__ Variables to be formatted
+*
+**********************************/
 #define DBG_DUMP(...) ADD_TXT(__VA_ARGS__)
 #endif // _DBG_DUMP
 
 #ifndef _OUTPUT_DBG_DOC
 
-/**
- * @name	OUTPUT_DBG_DOC
- * @brief	Append (formatted) documentation text to the output file,
- * 			if enabled
- * @param[in] 	fmt			Format string to be written
- * @param[in] __VA_ARGS__	Variables to be formatted
- */
+
+/**********************************
+*
+*	 @name	OUTPUT_DBG_DOC
+*
+*    @brief	Append (formatted)
+*			documentation text to
+*			the output file,
+*			if enabled
+*
+*    @param[in]   fmt		Format string to be written
+*    @param[in] __VA_ARGS__	Variables to be formatted
+*
+**********************************/
 #define OUTPUT_DBG_DOC(fmt, ...)
 #else // _DBG_PREV_MACRO
 
-/**
- * @name	OUTPUT_DBG_DOC
- * @brief	Append (formatted) documentation text to the output file,
- * 			if enabled
- * @param[in] 	fmt			Format string to be written
- * @param[in] __VA_ARGS__	Variables to be formatted
- */
+
+/**********************************
+*
+*	 @name	OUTPUT_DBG_DOC
+*
+*    @brief	Append (formatted)
+*			documentation text to
+*			the output file,
+* 			if enabled
+*
+*    @param[in]   fmt		Format string to be written
+*    @param[in] __VA_ARGS__	Variables to be formatted
+*
+**********************************/
 #define OUTPUT_DBG_DOC(...) ADD_TXT(__VA_ARGS__)
 #endif // _DBG_PREV_MACRO
 

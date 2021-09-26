@@ -1,28 +1,53 @@
+/**********************************
+*
+*	 @file      disassemble.c
+*	 @author    Thomas Gijsbers
+*	 @brief     
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+**********************************/
+
 #include "disassemble.h"
 #include "sys/common.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// !!! TODO !!!
+// TODO !!!
 // BYTE   MEM[0x8000][64] = {0};
 // BYTE **MEM_BLOCKS = MEM;
 
-/**
- * @name		disassemble_block
- * @brief		Disassemble a code block by specifying the @p size
- *
- * @param[out]	pppINSTR Pointer to resulting instruction sequence,
- * 						@a NULL if none
- * @param[in]	MEM Pointer to the start of the
- * 					binary's memory
- * @param[in]	loc	Offset of the instruction data
- * @param[in]	size Size of instruction data in bytes
- *
- * @returns		Integer containing bytes advanced.
- * 				If instructions are aligned, this
- * 				is equal to @p size
- */
+
+/**********************************
+*
+*	 @brief		Disassemble a code
+*				block by specifying
+*				the @p size
+*
+*	 @param[out] pppINSTR	Pointer to resulting
+*							instruction sequence,
+*							@a NULL if none
+*
+*	 @param[in] MEM			Pointer to the start
+*							of the binary's
+*							memory 
+*
+*	 @param[in] loc			Offset of the
+*							instruction data
+*
+*	 @param[in] size		Size of instruction
+*							data in bytes
+*
+*	 @return	Integer containing bytes
+*				advanced. If instructions
+*				are aligned, this is equal
+*				to @p size
+*
+***********************************/
 int disassemble_block(INSTRUCTION ***pppINSTR, BYTE *MEM, u32 loc, size_t size)
 {
 	if (pppINSTR == NULL)
@@ -60,16 +85,21 @@ int disassemble_block(INSTRUCTION ***pppINSTR, BYTE *MEM, u32 loc, size_t size)
 	return advance;
 }
 
-/**
- * @name		disassemble_single
- * @brief		Disassemble a single instruction from @p loc
- *
- * @param[in]	MEM Pointer to the start of the
- * 					binary's memory
- * @param[in]	loc	Offset of the instruction data
- *
- * @returns		Pointer to disassembled instruction structure
- */
+
+/**********************************
+*
+*	 @brief 	Disassemble a single
+*				instruction from @p loc
+*
+*	 @param[in]	MEM		Pointer to the start
+*						of the binary's memory
+*
+*	 @param[in]	loc		Offset of the instruction data
+*
+*	 @return	Pointer to disassembled
+*				instruction structure
+*
+**********************************/
 INSTRUCTION *disassemble_single(BYTE *MEM, u32 loc)
 {
 	INSTRUCTION *pINSTR = decode_opcode(MEM + loc);
@@ -80,14 +110,19 @@ INSTRUCTION *disassemble_single(BYTE *MEM, u32 loc)
 u16 tmpadr = 0;
 char tmprp[8][5] = {"B","C","D","E","H","L","(HL)","A"};
 
-/**
- * @name		decode_opcode
- * @brief		Disassemble instruction pointed to
- *
- * @param[in]	raw_bytes Pointer to instruction in memory to decode
- *
- * @returns		Pointer to resulting decoded instruction data
- */
+
+/**********************************
+*
+*	 @brief		Disassemble instruction 
+*				from @p raw_bytes pointer
+*
+*    @param[in]	raw_bytes	Pointer to instruction
+*							in memory to decode
+*
+*    @return	Pointer to resulting
+*				decoded instruction data
+*
+**********************************/
 INSTRUCTION *decode_opcode(BYTE *raw_bytes)
 {
 	if (raw_bytes == NULL)
@@ -99,8 +134,8 @@ INSTRUCTION *decode_opcode(BYTE *raw_bytes)
 
 	pINSTR->mnemonic		= mnm;
 	pINSTR->operand_count	= 1;
-	pINSTR->addr			= tmpadr++;
-	pINSTR->attributes.type = LOAD;
+	// pINSTR->addr			= tmpadr++;
+	// pINSTR->attributes.type = LOAD;
 
 	return pINSTR;
 }

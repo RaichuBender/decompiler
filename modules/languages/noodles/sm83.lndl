@@ -1,3 +1,26 @@
+/**********************************
+*
+*	 @file      sm83.lmodule
+*	 @author    Thomas Gijsbers
+*	 @brief     SM83 Assembly Language Module
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+*		"GAME BOY" and "GAME BOY COLOR” are
+*			trade narks or registered trade
+*			mark of Nintendo of America Inc.
+*			and／or Nintendo Co., Ltd.
+*		Usage under FAIR USE.
+*		All rights regarding usage of the
+*			aforementioned trade marks belong
+*			to their respective owners.
+*
+**********************************/
+
+
 LANGUAGE(sm83_asm)
 #: Game Boy SM83 (Z80) assembly language
 
@@ -7,19 +30,24 @@ LANGUAGE(sm83_asm)
 	#: Regular
 		Size:	12 BYTES
 
+		// Registers:
+		// A F
 		REGISTER(AF)
 		{
 			Mapping:	0x00
 			Size:		16 BITS
 			Purpose: 	GENERAL
 		},
+		// Accumulator
 		REGISTER(A)
 		{
 			Mapping:	0x00
 			Size:		8 BITS 
 			Purpose:	GENERAL
 		},
+		// Note: F is the flags register defined below
 
+		// B C
 		REGISTER(BC)
 		{
 			Mapping:	0x10
@@ -39,6 +67,7 @@ LANGUAGE(sm83_asm)
 			Purpose:	GENERAL
 		},
 
+		// D E
 		REGISTER(DE)
 		{
 			Mapping:	0x20
@@ -58,6 +87,7 @@ LANGUAGE(sm83_asm)
 			Purpose:	GENERAL
 		},
 
+		// H L
 		REGISTER(HL)
 		{
 			Mapping:	0x30
@@ -78,12 +108,15 @@ LANGUAGE(sm83_asm)
 		},
 
 
+		// Program Counter
 		REGISTER(PC)
 		{
 			Mapping:	0x40
 			Size:		16 BITS
 			Purpose: 	PROGRAM_COUNTER
 		},
+
+		// Stack Pointer
 		REGISTER(SP)
 		{
 			Mapping:	0x50
@@ -91,6 +124,7 @@ LANGUAGE(sm83_asm)
 			Purpose: 	STACK_POINTER
 		},
 
+		// Flags (paired with A)
 		REGISTER(F)
 		{
 			Mapping:	0x08
@@ -98,18 +132,26 @@ LANGUAGE(sm83_asm)
 			Purpose:	FLAGS
 		},
 
+		// Flags:
+		// Zero
 		FLAG(ZF)
 		{
 			Mapping: 	0x0f
 		},
+
+		// Negative (last operation was a subtraction
 		FLAG(NF)
 		{
 			Mapping: 	0x0e
 		},
+
+		// Half-Carry (nybble)
 		FLAG(HF)
 		{
 			Mapping: 	0x0d
 		},
+
+		// Carry (byte)
 		FLAG(CF)
 		{
 			Mapping: 	0x0c
@@ -128,12 +170,13 @@ LANGUAGE(sm83_asm)
 
 		"STOP 0":	0x10	2 4
 		{
-			NO_OP;
+			NO_OP;	// TODO
 		}
 
 		"HALT":		0x76	1 4
 		{
-			NO_OP;
+			NO_OP;	// TODO
+
 		}
 
 	# 8-bit Loads:

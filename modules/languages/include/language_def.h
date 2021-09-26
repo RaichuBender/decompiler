@@ -1,6 +1,6 @@
 /**********************************
 *
-*	 @file      patch.h
+*	 @file      language_def.h
 *	 @author    Thomas Gijsbers
 *	 @brief     
 *	 @version   0.1
@@ -10,16 +10,15 @@
 *	           	   All rights reserved.
 *
 **********************************/
-#ifndef __PATCH_H__
-#define __PATCH_H__
+#ifndef __LANGUAGE_DEF_H__
+#define __LANGUAGE_DEF_H__
 
-#include "typedefs.h"
+#include "language.h"
+#include "languages_def.0.gen.h"
 
-typedef struct
+LANGUAGE language_module_list[] =
 {
-	const char *identifier;
-	const char *display_name;
-	const char *user_description;
-} PATCH;
+#	include "languages_def.1.gen.h"
+};
 
-#endif // __PATCH_H__
+#endif // __LANGUAGE_DEF_H__

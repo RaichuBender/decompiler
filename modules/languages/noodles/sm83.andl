@@ -1,0 +1,30 @@
+/**********************************
+*
+*	 @file      sm83.amodule
+*	 @author    Thomas Gijsbers
+*	 @brief     SM83 Architecture Module
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+*		"GAME BOY" and "GAME BOY COLOR” are
+*			trade narks or registered trade
+*			mark of Nintendo of America Inc.
+*			and／or Nintendo Co., Ltd.
+*		Usage under FAIR USE.
+*		All rights regarding usage of the
+*			aforementioned trade marks belong
+*			to their respective owners.
+*
+**********************************/
+
+
+ARCHITECTURE(sm83)
+#: Nintendo Game Boy CPU
+
+	DisplayName:	Sharp SM83 (Z80)
+	Language:		sm83_asm
+
+END_ARCHITECTURE

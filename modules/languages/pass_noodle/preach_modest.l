@@ -1,3 +1,15 @@
+/**********************************
+*
+*	 @file      preach_modest.l
+*	 @author    Thomas Gijsbers
+*	 @brief     Macro preprocessor lexer
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+**********************************/
 %{
 #include "preach_modest.h"
 
@@ -17,7 +29,7 @@ MACRO:[a-zA-Z0-9_]+?\(\)(.*?\n.*)*?=BEGIN(.*?\n.*)*?=END	{
 	char *macro_begin = PROCESS_MACRO(yytext, EXPANDS_HAS_ARGS);
 	EXPAND_MACRO(macro_begin);
 	PROCESS_MACRO_EXPANSION();
-	OUTPUT_DBG_DOC(" *\t@returns *** PREVIEW ***\n\t%s\n", macro->expand);
+	OUTPUT_DBG_DOC(" *\t@return *** PREVIEW ***\n\t%s\n", macro->expand);
 	OUTPUT_DBG_DOC(" */\n");
 	OUTPUT_DBG_DOC("#define  dummy_macro__%s  (...)\n\n", macro->argv[0]);
 	++macro_count;
@@ -30,7 +42,7 @@ MACRO:[a-zA-Z0-9_]+?\(.*?\)(.*?\n.*)*?=BEGIN(.*?\n.*)*?=END	{
 	char *macro_begin = PROCESS_MACRO(yytext, EXPANDS_NO_ARGS_HAS_BRACKETS);
 	EXPAND_MACRO(macro_begin);
 	PROCESS_MACRO_EXPANSION();
-	OUTPUT_DBG_DOC(" *\t@returns *** PREVIEW ***\n\t%s\n", macro->expand);
+	OUTPUT_DBG_DOC(" *\t@return *** PREVIEW ***\n\t%s\n", macro->expand);
 	OUTPUT_DBG_DOC(" */\n");
 	OUTPUT_DBG_DOC("#define  dummy_macro__%s  (...)\n\n", macro->argv[0]);
 	++macro_count;
@@ -43,7 +55,7 @@ MACRO:[a-zA-Z0-9_]+?(.*?\n.*)*?=BEGIN(.*?\n.*)*?=END	{
 	char *macro_begin = PROCESS_MACRO(yytext, EXPANDS_NO_ARGS_NO_BRACKETS);
 	EXPAND_MACRO(macro_begin);
 	PROCESS_MACRO_EXPANSION();
-	OUTPUT_DBG_DOC(" *\t@returns *** PREVIEW ***\n\t%s\n", macro->expand);
+	OUTPUT_DBG_DOC(" *\t@return *** PREVIEW ***\n\t%s\n", macro->expand);
 	OUTPUT_DBG_DOC(" */\n");
 	OUTPUT_DBG_DOC("#define  dummy_macro__%s  (...)\n\n", macro->argv[0]);
 	++macro_count;
@@ -54,7 +66,7 @@ MACRO:[a-zA-Z0-9_]+?\(\).*?\n 	{
 	dbg_printf("%s ::\n%s\n\n\n", "MACRO:[a-zA-Z0-9_]+?\\(\\).*?\\n", yytext);
 	MACRO *macro = &macro_list[macro_count];
 	PROCESS_MACRO(yytext, STUB_NO_ARGS_HAS_BRACKETS);
-	OUTPUT_DBG_DOC(" *\t@returns\tNothing.\n");
+	OUTPUT_DBG_DOC(" *\t@return\tNothing.\n");
 	OUTPUT_DBG_DOC(" */\n");
 	OUTPUT_DBG_DOC("#define  dummy_macro__%s  (...)\n\n", macro->argv[0]);
 	++macro_count;
@@ -65,7 +77,7 @@ MACRO:[a-zA-Z0-9_]+?\(.*?\).*?\n {
 	dbg_printf("%s ::\n%s\n\n\n", "MACRO:[a-zA-Z0-9_]+?\\(.*?\\).*?\\n", yytext);
 	MACRO *macro = &macro_list[macro_count];
 	PROCESS_MACRO(yytext, STUB_HAS_ARGS);
-	OUTPUT_DBG_DOC(" *\t@returns\tNothing.\n");
+	OUTPUT_DBG_DOC(" *\t@return\tNothing.\n");
 	OUTPUT_DBG_DOC(" */\n");
 	OUTPUT_DBG_DOC("#define  dummy_macro__%s  (...)\n\n", macro->argv[0]);
 	++macro_count;
@@ -76,7 +88,7 @@ MACRO:[a-zA-Z0-9_]+?.*?\n		{
 	dbg_printf("%s ::\n%s\n\n\n", "MACRO:[a-zA-Z0-9_]+?.*?\\n", yytext);
 	MACRO *macro = &macro_list[macro_count];
 	PROCESS_MACRO(yytext, STUB_NO_ARGS_NO_BRACKETS);
-	OUTPUT_DBG_DOC(" *\t@returns\tNothing.\n");
+	OUTPUT_DBG_DOC(" *\t@return\tNothing.\n");
 	OUTPUT_DBG_DOC(" */\n");
 	OUTPUT_DBG_DOC("#define  dummy_macro__%s  (...)\n\n", macro->argv[0]);
 	++macro_count;

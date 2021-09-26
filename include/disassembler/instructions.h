@@ -1,3 +1,15 @@
+/**********************************
+*
+*	 @file      instructions.h
+*	 @author    Thomas Gijsbers
+*	 @brief     
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+**********************************/
 #ifndef __INSTRUCTIONS_H__
 #define __INSTRUCTIONS_H__
 
@@ -17,11 +29,11 @@ typedef u32 OPERAND_INDEX;
 
 typedef enum
 {
-	NONE,
-	REG,
+	PARAM_NONE,
+	PARAM_REG,
 	OP,
 	CONST,
-	REG_ADR,
+	PARAM_REG_ADR,
 	OP_ADR,
 	CONST_ADR,
 	FLAG
@@ -58,15 +70,15 @@ typedef struct
 typedef struct _INSTRUCTION
 {
 	char *			 mnemonic;
-#ifdef _UNINDEXED
+// #ifdef _UNINDEXED
 	u8				 opcode;
-#endif // _UNINDEXED
-	u64				 addr;
+// #endif // _UNINDEXED
+	// u64				 addr;
 	u32				 operand_count;
 	u32				 cycles;
-	INSTRUCTION_ATTR attributes;
-	u32				 logic_count;
-	LOGIC *			 logic;
+	// INSTRUCTION_ATTR attributes;
+	// u32				 logic_count;
+	// LOGIC *			 logic;
 } INSTRUCTION;
 
 #endif //__INSTRUCTIONS_H__

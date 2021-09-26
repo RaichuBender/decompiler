@@ -1,8 +1,15 @@
-/**
- * @file	pass_noodle.c
- * @brief	Module parser main
- * @author	Thomas Gijsbers (@RaichuBender)
- */
+/**********************************
+*
+*	 @file      preach_modest.c
+*	 @author    Thomas Gijsbers
+*	 @brief     Preprocessor parser main
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+**********************************/
 
 #ifndef _SYNTAX
 
@@ -13,7 +20,7 @@
 
 #else // _SYNTAX
 
-#include "preprocess.gen.h"
+#include "preach_modest.gen.h"
 
 #endif // _SYNTAX
 

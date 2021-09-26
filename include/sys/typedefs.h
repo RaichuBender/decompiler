@@ -1,3 +1,15 @@
+/**********************************
+*
+*	 @file      typedefs.h
+*	 @author    Thomas Gijsbers
+*	 @brief     
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+**********************************/
 #ifndef __TYPEDEFS_H__
 #define __TYPEDEFS_H__
 

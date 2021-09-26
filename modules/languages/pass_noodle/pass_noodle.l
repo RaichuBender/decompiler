@@ -1,3 +1,15 @@
+/*********************************
+ /*
+*	 @file      pass_noodle.l
+*	 @author    Thomas Gijsbers
+*	 @brief     Module parser lexer
+*	 @version   0.1
+*	 @date      2021／09／24
+*
+*	 @copyright	Ⓒ Copyright 2021 — Thomas Gijsbers
+*	           	   All rights reserved.
+*
+**********************************/
 %{
 #include "pass_noodle.h"
 #if 0
@@ -91,6 +103,8 @@ REGISTER_STORAGE\s*?\(\s*.+\s*?\).*?$	{
 }
 
 END_REGISTER_STORAGE	{
+	INDENT(--token_scope);
+	ADD_TXT("}\n");
 	END_2();
 }
 
@@ -99,6 +113,8 @@ INSTRUCTION_SET\s*?\(\s*.+\s*?\).*?$	{
 }
 
 END_INSTRUCTION_SET	{
+	INDENT(--token_scope);
+	ADD_TXT("}\n")
 	END_2();
 }
 
@@ -111,18 +127,15 @@ FLAG\s*\(\s*.+\s*\)	{
 	REGI(FLAG, Flag);
 }
 
-\}	{ // Closing bracket
+\}	{	// Closing bracket
 	if (tmd[token_scope] == LOGIC)
 	{
-		if (tmd[token_scope -  1] == INSTR)
+		ADD_TXT("\n");
+		if (tmd[--token_scope] == INSTR)
 		{
-			--token_scope;
 			INDENT(--token_scope);
-			ADD_TXT("},\n");
-		}
-		else
-		{
-			--token_scope;
+			ADD_TXT("},\n")
+			DECODE_INSTR();
 		}
 	}
 	else
@@ -134,18 +147,42 @@ FLAG\s*\(\s*.+\s*\)	{
 
 REPR:.+?$	{
 	DBG_TRACEL(_REPR); /* ++token_scope; */
+	char *start = strchr(yytext, L':');
+	while (((*start) == ' ') || ((*start) == '\t'))
+		++start;
+
+	REPR = malloc(strlen(start) + 1);
+	strcpy(REPR, start);
 }
 
 PARAM:.+?$	{
 	DBG_TRACEL(_PARAM); /* ++token_scope; */
+	char *start = strchr(yytext, L':');
+	while (((*start) == ' ') || ((*start) == '\t'))
+		++start;
+
+	PARAM = malloc(strlen(start) + 1);
+	strcpy(PARAM, start);
 }
 
 INSTR_COUNT:.+?$	{
 	DBG_TRACEL(_INSTR_COUNT); /* ++token_scope; */
+	char *start = strchr(yytext, L':');
+	while (((*start) == ' ') || ((*start) == '\t'))
+		++start;
+
+	INSTR_COUNT = malloc(strlen(start) + 1);
+	strcpy(INSTR_COUNT, start);
 }
 
 CYCLES:.+?$	{
 	DBG_TRACEL(_CYCLES); /* ++token_scope; */
+	char *start = strchr(yytext, L':');
+	while (((*start) == ' ') || ((*start) == '\t'))
+		++start;
+
+	CYCLES = malloc(strlen(start) + 1);
+	strcpy(CYCLES, start);
 }
 
 ^\s*.+?;$	{
@@ -153,11 +190,17 @@ CYCLES:.+?$	{
 
 	if (tmd[token_scope] != LOGIC)
 	{
+		ADD_TXT("\n");
 		tmd[++token_scope] = LOGIC;
 	}
 
-	INDENT(token_scope);
-	ADD_TXT("/* [LOGIC] */\n");
+	INDENT(token_scope - 1);
+	char *start = yytext;
+
+	while (((*start) == ' ')||((*start) == '\t'))
+		++start;
+
+	ADD_TXT("/\/\t\t%s\n", start);
 }
 
 \".+?\"\s*:.*?GROUP\(\s*.+\s*\).*?$	{
