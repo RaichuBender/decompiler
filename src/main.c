@@ -52,6 +52,11 @@ static inline get_size(FILE *fp);
 **********************************/
 int main(int argc, const char *argv[])
 {
+	u16 dadr = 0;
+
+	if (argc >= 2)
+		dadr = strtoul(argv[1], NULL, 16);
+
 	FILE *fp = fopen(TEST_FILE, "rb");
 	if (fp == NULL)
 		exit(-1);
@@ -61,7 +66,7 @@ int main(int argc, const char *argv[])
 	MEM = malloc(sz);
 	fread(MEM, 0x400, sz / 0x400, fp);
 
-	int mem_byte = 0x14f;
+	int mem_byte = dadr - 1;
 
 	// TODO do proper size deduction
 	char *source_mnemonic	 = malloc(256);

@@ -11,7 +11,18 @@
 #	           	   All rights reserved.
 #
 #**********************************
-CC	:=	gcc
+# ADD_SUFFIX	 = TRUE
+
+DBG_SUFFIX	:= _d
+REL_SUFFIX	:= _r
+STATIC_LINK_SUFFIX	 = _static
+
+PROFILE	 = DEBUG
+# PROFILE	 = RELEASE
+
+# STATIC_LINK	 = TRUE
+
+CC	 =	gcc
 
 INCLUDE	:=	-I$(ROOTPARH)include	\
 	-I$(ROOTPARH)include/sys	\
@@ -19,3 +30,28 @@ INCLUDE	:=	-I$(ROOTPARH)include	\
 	-I$(ROOTPARH)include/disassembler
 
 MAKE	+=	--no-print-directory
+
+
+ifeq ($(PROFILE),RELEASE)
+
+ifeq ($(ADD_SUFFIX),TRUE)
+EXE_SFX	:= $(REL_SUFFIX)
+endif
+
+CFLAGS	:= -O2 -s
+else #eq ($(PROFILE),RELEASE)
+
+ifeq ($(ADD_SUFFIX),TRUE)
+EXE_SFX	:= $(DBG_SUFFIX)
+endif
+
+CFLAGS	:= -O0 -g
+endif #eq ($(PROFILE),RELEASE)
+
+
+ifeq ($(STATIC_LINK),TRUE)
+ifeq ($(ADD_SUFFIX),TRUE)
+EXE_SFX	:= $(EXE_SFX)$(STATIC_LINK_SUFFIX)
+endif
+CFLAGS	+= -static
+endif

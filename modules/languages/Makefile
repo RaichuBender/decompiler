@@ -24,8 +24,8 @@ SOURCES	:=	$(wildcard src/*.c)
 OBJECTS	:=	$(patsubst src/%,obj/%,$(SOURCES))
 OBJECTS	:=	$(OBJECTS:%.c=%.o)
 
-CFLAGS	:=	-O0 -g -fPIC
-# CFLAGS	:=	-O2 -s -static -fPIC
+CFLAGS	+= -fPIC
+
 
 default:	$(OUT)
 	@$(MAKE) -f noodles.mk
