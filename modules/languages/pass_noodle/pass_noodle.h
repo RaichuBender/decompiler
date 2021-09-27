@@ -57,6 +57,7 @@ int			  param_count = 0;
 PARAM_KIND *  params	  = NULL;
 unsigned int *param_idx	  = NULL;
 INSTR_TYPE *  param_type  = NULL;
+int           imm_chars   = 0;
 int			  instr_count = 0;
 int			  cycles	  = 0;
 

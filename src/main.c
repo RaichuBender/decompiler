@@ -10,53 +10,6 @@
 *
 **********************************/
 
-/*	#include "disassemble.h"
-#include "language.h"
-#include "sys/common.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-#define TEST_FILE ".pokeyellow.gbc"
-
-BYTE *MEM;
-
-/**********************************
-*
-*	 @brief		entry point
-*
-*    @param[in] argc	Argument count
-*
-*    @param[in] argv	Pointer to
-*						argument buffer
-*
-*    @return int 
-*
-**********************************\/
-int main(int argc, const char *argv[])
-{
-	FILE *fp = fopen(TEST_FILE, "rb");
-	if (fp == NULL)
-		exit(-1);
-
-	fseek(fp, 0L, SEEK_END);
-	int sz = ftell(fp);
-	fseek(fp, 0L, SEEK_SET);
-
-	MEM = malloc(sz);
-	fread(MEM, 1, sz, fp);
-
-	INSTRUCTION **ppINSTR;
-	EVAL(disassemble_block(&ppINSTR, MEM, 0, 8));
-
-	for (int i = 0; ppINSTR[i] != NULL; ++i)
-		printf(	"%04x:  %02x    %s\n",
-				ppINSTR[i]->addr,
-				MEM[i],
-				ppINSTR[i]->mnemonic	);
-
-	return 0;
-}	*/
-
 #include "sys/terminal_colors.h"
 
 #include <stdio.h>
@@ -73,18 +26,30 @@ static const char OPERATION_COLOR[10][20] =
 {
 	/* INVALID    */ C_RED,
 	/* NOTHING    */ CB_BLACK,
-	/* SPECIAL    */ CB_WHITE,
-	/* MOV_STOR   */ CB_YELLOW,
-	/* ARITHMETIC */ CB_YELLOW,
-	/* BIT_MANIP  */ CB_YELLOW,
+	/* SPECIAL    */ CB_BLUE,
+	/* MOV_STOR   */ C_MAGENTA,
+	/* ARITHMETIC */ CB_MAGENTA,
+	/* BIT_MANIP  */ CB_WHITE,
 	/* JUMP       */ CB_GREEN,
-	/* CALL       */ CB_CYAN,
-	/* RETURN     */ CB_MAGENTA,
+	/* CALL       */ CB_YELLOW,
+	/* RETURN     */ CB_RED,
 	/* END        */ NULL,		// TODO
 };
 
 static inline get_size(FILE *fp);
 
+/**********************************
+*
+*	 @brief		entry point
+*
+*    @param[in] argc	Argument count
+*
+*    @param[in] argv	Pointer to
+*						argument buffer
+*
+*    @return int 
+*
+**********************************/
 int main(int argc, const char *argv[])
 {
 	FILE *fp = fopen(TEST_FILE, "rb");
@@ -96,7 +61,7 @@ int main(int argc, const char *argv[])
 	MEM = malloc(sz);
 	fread(MEM, 0x400, sz / 0x400, fp);
 
-	int mem_byte = -1;
+	int mem_byte = 0x14f;
 
 	// TODO do proper size deduction
 	char *source_mnemonic	 = malloc(256);
@@ -106,6 +71,15 @@ int main(int argc, const char *argv[])
 	{
 		for (int poll_instructions = 0; poll_instructions < 256; ++poll_instructions)
 		{
+			if  (poll_instructions == 255)
+				if  (REGULAR.instructions[poll_instructions].opcode   != MEM[mem_byte])
+				{
+					printf(C_RED "%02x:%04x" C_RED "\t\t< ¡¡¡ invalid !!! >\n" F_RESET,
+							mem_byte >> 16,
+							((mem_byte > 0x3fff) << 14) | mem_byte & 0x7fff);
+					break;
+				}
+
 			if  (REGULAR.instructions[poll_instructions].opcode   != MEM[mem_byte])	continue;
 
 #ifdef	_SKIP_NOP
@@ -164,16 +138,27 @@ int main(int argc, const char *argv[])
 							OPERATION_COLOR[REGULAR.instructions[poll_instructions].operation],
 							first);
 
-
-			printf(C_MAGENTA "%02x" C_WHITE ":" CB_BLUE "%04x\t\t" F_RESET "%s\n" F_RESET, mem_byte >> 16, mem_byte & 0xffff,
+			switch (REGULAR.instructions[poll_instructions].imm)
+			{
+			case (2):
+				sprintf(formatted_mnemonic, formatted_mnemonic, *(u8  *)(&MEM[mem_byte + 1]));
+				break;
+			case (3):
+				sprintf(formatted_mnemonic, formatted_mnemonic, *(s8  *)(&MEM[mem_byte + 1]) + (s16)mem_byte);
+				break;
+			case (4):
+				sprintf(formatted_mnemonic, formatted_mnemonic, *(u16 *)(&MEM[mem_byte + 1]));
+			}
+			printf(C_MAGENTA "%02x" C_WHITE ":" CB_BLUE "%04x\t\t" F_RESET "%s\n" F_RESET, mem_byte >> 16, ((mem_byte > 0x3fff) << 14) | mem_byte & 0x7fff,
 					formatted_mnemonic);
+			if (0==strcmp(REGULAR.instructions[poll_instructions].mnemonic, "RET"))
+				return 0;
 
 SKIP_PRINT:
 			mem_byte += REGULAR.instructions[poll_instructions].operand_count - 1;
 
 		}
 		// for (poll_instructions: 0 to 255)
-
 	}
 	// while (++mem_byte < sz)
 

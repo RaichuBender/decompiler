@@ -202,7 +202,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		^%LOAD( H, 0x60 )
 		^%LOAD( L, 0x68 )
 
-		"LD (HL), %s": MOV_STOR	GROUP( 0x70, 1, 6 )
+		"LD (HL), %s": MOV_STOR	GROUP( 0x70, 6, 1 )
 		{
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)    }
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"   }
@@ -221,7 +221,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 
 		^%LOAD( A, 0x78 )
 
-		"LD %s, %02x", IMM8: MOV_STOR	GROUP( 0x06, 8, 8 )
+		"LD %s, 0x%02x", IMM8: MOV_STOR	GROUP( 0x06, 8, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -246,13 +246,13 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"LD (HL+), A", IMM8:	MOV_STOR	0x26	1 8
+		"LD (HL+), A":	MOV_STOR	0x26	1 8
 		{
 			LOAD			REG_ADR(HL), REG(A);
 			ARITHMETIC ADD	REG(HL), CONST(1);
 		}
 
-		"LD (HL-), A", IMM8:	MOV_STOR	0x36	1 8
+		"LD (HL-), A":	MOV_STOR	0x36	1 8
 		{
 			LOAD			REG_ADR(HL), REG(A);
 			ARITHMETIC SUB	REG(HL), CONST(1);
@@ -419,7 +419,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"AND %02x", IMM8: ARITHMETIC	0xe6	2 8
+		"AND 0x%02x", IMM8: ARITHMETIC	0xe6	2 8
 		{
 			ARITHMETIC ADD	REG(A), PARAM[0];
 		}
@@ -437,7 +437,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"XOR %02x", IMM8: ARITHMETIC	0xee	2 8
+		"XOR 0x%02x", IMM8: ARITHMETIC	0xee	2 8
 		{
 			ARITHMETIC ADD	REG(A), PARAM[0];
 		}
@@ -455,7 +455,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"OR %02x", IMM8: ARITHMETIC	0xf6	2 8
+		"OR 0x%02x", IMM8: ARITHMETIC	0xf6	2 8
 		{
 			ARITHMETIC ADD	REG(A), PARAM[0];
 		}
@@ -481,7 +481,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"CP %02x", IMM8: ARITHMETIC	0xfe	2 8
+		"CP 0x%02x", IMM8: ARITHMETIC	0xfe	2 8
 		{
 			local a = A;
 			REG_SUB	A, IMM8;
@@ -492,6 +492,99 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			SETFLAG CF, A > 0xff;
 
 			A = a;
+		}
+
+	##	Branching
+	# Unconditional jumps
+		"JP 0x%04x", IMM16: JUMP	0xc3	3 16
+		{
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"JR 0x%04x", IMM8_R: JUMP	0x18	2 12
+		{
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+	# Conditional jumps
+		"JP NZ,%04x", IMM16: JUMP	0xc2	3 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"JP Z,%04x", IMM16: JUMP	0xca	3 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"JP NC,%04x", IMM16: JUMP	0xd2	3 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"JP C,%04x", IMM16: JUMP	0xda	3 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+
+		"CALL 0x%04x", IMM16: CALL	0xcd	3 24
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+
+		"CALL NZ,%04x", IMM16: CALL	0xc4	3 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"CALL Z,%04x", IMM16: CALL	0xcc	3 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"CALL NC,%04x", IMM16: CALL	0xd4	3 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"CALL C,%04x", IMM16: CALL	0xdc	3 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+
+
+		"RET": RETURN	0xc9	1 16
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"RETI": RETURN	0xd9	1 16
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+
+		"RET NZ": RETURN	0xc0	1 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"RET Z": RETURN	0xc8	1 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"RET NC": RETURN	0xd0	1 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		}
+
+		"RET C": RETURN	0xd8	1 12
+		{	#				 TODO conditional ^^ 12/16
+			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
 		}
 
 	END_INSTRUCTION_SET

@@ -17,10 +17,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-// TODO !!!
-// BYTE   MEM[0x8000][64] = {0};
-// BYTE **MEM_BLOCKS = MEM;
 
+#if 0	// TODO !!!
+BYTE   MEM[0x8000][64] = {0};
+BYTE **MEM_BLOCKS = MEM;
+#endif
 
 /**********************************
 *
@@ -134,8 +135,9 @@ INSTRUCTION *decode_opcode(BYTE *raw_bytes)
 
 	pINSTR->mnemonic		= mnm;
 	pINSTR->operand_count	= 1;
-	// pINSTR->addr			= tmpadr++;
-	// pINSTR->attributes.type = LOAD;
-
+#if 0
+	pINSTR->addr			= tmpadr++;
+	pINSTR->attributes.type = LOAD;
+#endif
 	return pINSTR;
 }

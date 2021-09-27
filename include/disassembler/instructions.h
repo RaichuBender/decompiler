@@ -79,6 +79,7 @@ typedef struct _INSTRUCTION
 //	u64				 addr;
 	u32				 operand_count;
 	u32				 cycles;
+	int				 imm;
 // INSTRUCTION_ATTR attributes;
 // u32				 logic_count;
 // LOGIC *			 logic;
