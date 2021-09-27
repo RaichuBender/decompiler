@@ -15,19 +15,19 @@
 
 #include "typedefs.h"
 
-typedef enum _LOGIC_TYPE
-{
-	NO_OP,
-	ARITHMETIC,
-	LOAD,
-	STORE,
-	BRANCH,
-} LOGIC_TYPE;
+// typedef enum _LOGIC_TYPE
+// {
+// 	NO_OP,
+// 	ARITHMETIC,
+// 	LOAD,
+// 	STORE,
+// 	BRANCH,
+// } LOGIC_TYPE;
 
 typedef u32 REGISTER_INDEX;
 typedef u32 OPERAND_INDEX;
 
-typedef enum
+typedef enum _AFFECTS
 {
 	PARAM_NONE,
 	PARAM_REG,
@@ -39,20 +39,22 @@ typedef enum
 	FLAG
 } AFFECTS;
 
-typedef struct
+typedef struct _INSTRUCTION_ATTR
 {
-	LOGIC_TYPE type;
+	// LOGIC_TYPE type;
 	AFFECTS	   aff1;
 	AFFECTS	   aff2;
 	u32		   index1;
 	u32		   index2;
 } INSTRUCTION_ATTR;
 
-typedef enum
+typedef enum _OPERATION
 {
+	INVALID = 0,
 	NOTHING,
-	ADD,
-	SUBTRACT,
+	SPECIAL,
+	MOV_STOR,
+	ARITHMETIC,
 	BIT_MANIP,
 	JUMP,
 	CALL,
@@ -60,25 +62,26 @@ typedef enum
 	END
 } OPERATION;
 
-typedef struct
-{
-	OPERATION operation;
-	u32		  operand1;
-	u32		  operand2;
-} LOGIC;
+// typedef struct _LOGIC
+// {
+// 	OPERATION operation;
+// 	u32		  operand1;
+// 	u32		  operand2;
+// } LOGIC;
 
 typedef struct _INSTRUCTION
 {
-	char *			 mnemonic;
-// #ifdef _UNINDEXED
+	char *			 mnemonic;	/*
+#ifdef _UNINDEXED	*/
 	u8				 opcode;
-// #endif // _UNINDEXED
-	// u64				 addr;
+	OPERATION        operation;	/* // TODO use struct LOGIC
+#endif // _UNINDEXED	*/
+//	u64				 addr;
 	u32				 operand_count;
 	u32				 cycles;
-	// INSTRUCTION_ATTR attributes;
-	// u32				 logic_count;
-	// LOGIC *			 logic;
+// INSTRUCTION_ATTR attributes;
+// u32				 logic_count;
+// LOGIC *			 logic;
 } INSTRUCTION;
 
 #endif //__INSTRUCTIONS_H__

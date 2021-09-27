@@ -1,24 +1,24 @@
-/**********************************
-*
-*	 @file      sm83.lmodule
-*	 @author    Thomas Gijsbers (@RaichuBender)
-*	 @brief     SM83 Assembly Language Module
-*	 @version   0.1
-*	 @date      2021／09／24
-*
-*	 @copyright  © Copyright 2021 — Thomas Gijsbers
-*	           	   All rights reserved.
-*
-*		"GAME BOY" and "GAME BOY COLOR” are
-*			trade narks or registered trade
-*			mark of Nintendo of America Inc.
-*			and／or Nintendo Co., Ltd.
-*		Usage under FAIR USE.
-*		All rights regarding usage of the
-*			aforementioned trade marks belong
-*			to their respective owners.
-*
-**********************************/
+#**********************************
+#
+#	 @file      sm83.lmodule
+#	 @author    Thomas Gijsbers (@RaichuBender)
+#	 @brief     SM83 Assembly Language Module
+#	 @version   0.1
+#	 @date      2021／09／24
+#
+#	 @copyright  © Copyright 2021 — Thomas Gijsbers
+#	           	   All rights reserved.
+#
+#		"GAME BOY" and "GAME BOY COLOR” are
+#			trade narks or registered trade
+#			mark of Nintendo of America Inc.
+#			and／or Nintendo Co., Ltd.
+#		Usage under FAIR USE.
+#		All rights regarding usage of the
+#			aforementioned trade marks belong
+#			to their respective owners.
+#
+#**********************************
 
 
 LANGUAGE(sm83_asm)
@@ -30,24 +30,24 @@ LANGUAGE(sm83_asm)
 	#: Regular
 		Size:	12 BYTES
 
-		// Registers:
-		// A F
+		# Registers:
+		# A F
 		REGISTER(AF)
 		{
 			Mapping:	0x00
 			Size:		16 BITS
 			Purpose: 	GENERAL
 		},
-		// Accumulator
+		# Accumulator
 		REGISTER(A)
 		{
 			Mapping:	0x00
 			Size:		8 BITS 
 			Purpose:	GENERAL
 		},
-		// Note: F is the flags register defined below
+		# Note: F is the flags register defined below
 
-		// B C
+		# B C
 		REGISTER(BC)
 		{
 			Mapping:	0x10
@@ -67,7 +67,7 @@ LANGUAGE(sm83_asm)
 			Purpose:	GENERAL
 		},
 
-		// D E
+		# D E
 		REGISTER(DE)
 		{
 			Mapping:	0x20
@@ -87,7 +87,7 @@ LANGUAGE(sm83_asm)
 			Purpose:	GENERAL
 		},
 
-		// H L
+		# H L
 		REGISTER(HL)
 		{
 			Mapping:	0x30
@@ -108,7 +108,7 @@ LANGUAGE(sm83_asm)
 		},
 
 
-		// Program Counter
+		# Program Counter
 		REGISTER(PC)
 		{
 			Mapping:	0x40
@@ -116,7 +116,7 @@ LANGUAGE(sm83_asm)
 			Purpose: 	PROGRAM_COUNTER
 		},
 
-		// Stack Pointer
+		# Stack Pointer
 		REGISTER(SP)
 		{
 			Mapping:	0x50
@@ -124,7 +124,7 @@ LANGUAGE(sm83_asm)
 			Purpose: 	STACK_POINTER
 		},
 
-		// Flags (paired with A)
+		# Flags (paired with A)
 		REGISTER(F)
 		{
 			Mapping:	0x08
@@ -132,26 +132,26 @@ LANGUAGE(sm83_asm)
 			Purpose:	FLAGS
 		},
 
-		// Flags:
-		// Zero
+		# Flags:
+		# Zero
 		FLAG(ZF)
 		{
 			Mapping: 	0x0f
 		},
 
-		// Negative (last operation was a subtraction
+		# Negative (last operation was a subtraction
 		FLAG(NF)
 		{
 			Mapping: 	0x0e
 		},
 
-		// Half-Carry (nybble)
+		# Half-Carry (nybble)
 		FLAG(HF)
 		{
 			Mapping: 	0x0d
 		},
 
-		// Carry (byte)
+		# Carry (byte)
 		FLAG(CF)
 		{
 			Mapping: 	0x0c
@@ -163,17 +163,17 @@ LANGUAGE(sm83_asm)
 	#: All non-CB instructions
 
 	# Misc
-		"NOP":		0x00	1 4
+		"NOP":		NOTHING	0x00	1 4
 		{
 			NO_OP;
 		}
 
-		"STOP 0":	0x10	2 4
+		"STOP 0":	SPECIAL	0x10	2 4
 		{
 			NO_OP;	// TODO
 		}
 
-		"HALT":		0x76	1 4
+		"HALT":		SPECIAL	0x76	1 4
 		{
 			NO_OP;	// TODO
 
@@ -182,7 +182,7 @@ LANGUAGE(sm83_asm)
 	# 8-bit Loads:
 MACRO:LOAD( _REG_, _OP_B_ )
 =BEGIN
-		"LD _REG_, %s": GROUP( _OP_B_, 1, 8 )
+		"LD _REG_, %s": MOV_STOR	GROUP( _OP_B_, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -202,7 +202,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		^%LOAD( H, 0x60 )
 		^%LOAD( L, 0x68 )
 
-		"LD (HL), %s": GROUP( 0x70, 1, 6 )
+		"LD (HL), %s": MOV_STOR	GROUP( 0x70, 1, 6 )
 		{
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)    }
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"   }
@@ -214,14 +214,14 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"LD (HL), A": 0x77	1 8
+		"LD (HL), A": MOV_STOR	0x77	1 8
 		{
 			LOAD, REG_ADR(HL), REG(A);
 		}
 
 		^%LOAD( A, 0x78 )
 
-		"LD %s, %02x", IMM8: GROUP( 0x06, 8, 8 )
+		"LD %s, %02x", IMM8: MOV_STOR	GROUP( 0x06, 8, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -234,7 +234,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 	# 16-bit Loads:
-		"LD %s, A", IMM8: GROUP( 0x06, 16, 2 )
+		"LD %s, A", IMM8: MOV_STOR	GROUP( 0x06, 16, 2 )
 		{
 			REPR:	{	"(BC)"    "(DE)"    "(HL+)"    "(HL-)"   }
 			PARAM:	{	REG_ADR(BC)     REG_ADR(DE)     REG_ADR(HL)   REG_ADR(HL)  }
@@ -246,20 +246,20 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"LD (HL+), A", IMM8:	0x26	1 8
+		"LD (HL+), A", IMM8:	MOV_STOR	0x26	1 8
 		{
 			LOAD			REG_ADR(HL), REG(A);
 			ARITHMETIC ADD	REG(HL), CONST(1);
 		}
 
-		"LD (HL-), A", IMM8:	0x36	1 8
+		"LD (HL-), A", IMM8:	MOV_STOR	0x36	1 8
 		{
 			LOAD			REG_ADR(HL), REG(A);
 			ARITHMETIC SUB	REG(HL), CONST(1);
 		}
 
 	# 8-bit Arithmetic:
-		"INC %s": GROUP( 0x04, 8, 8 )
+		"INC %s": ARITHMETIC	GROUP( 0x04, 8, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -275,7 +275,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"DEC %s": GROUP( 0x05, 8, 8 )
+		"DEC %s": ARITHMETIC	GROUP( 0x05, 8, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -293,7 +293,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"ADD A, %s": GROUP( 0x80, 1, 8 )
+		"ADD A, %s": ARITHMETIC	GROUP( 0x80, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -310,7 +310,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"ADD A, 0x%02x", IMM8: 0xc6	2 8
+		"ADD A, 0x%02x", IMM8: ARITHMETIC	0xc6	2 8
 		{
 			ARITHMETIC ADD	REG(A), CONST(IMM8);
 
@@ -321,7 +321,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"ADC A, %s": GROUP( 0x88, 1, 8 )
+		"ADC A, %s": ARITHMETIC	GROUP( 0x88, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -339,7 +339,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"ADC A, 0x%02x", IMM8: 0xce	2 8
+		"ADC A, 0x%02x", IMM8: ARITHMETIC	0xce	2 8
 		{
 			ARITHMETIC ADD	REG(A), FLAG(CF);
 			ARITHMETIC ADD	REG(A), CONST(IMM8);
@@ -351,7 +351,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"SUB %s": GROUP( 0x90, 1, 8 )
+		"SUB %s": ARITHMETIC	GROUP( 0x90, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -368,7 +368,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"SUB A, 0x%02x", IMM8: 0xd6	2 8
+		"SUB A, 0x%02x", IMM8: ARITHMETIC	0xd6	2 8
 		{
 			ARITHMETIC SUB	REG(A), CONST(IMM8);
 
@@ -379,7 +379,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"SBC A, %s": GROUP( 0x98, 1, 8 )
+		"SBC A, %s": ARITHMETIC	GROUP( 0x98, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -396,7 +396,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"SBC A, 0x%02x", IMM8: 0xde	2 8
+		"SBC A, 0x%02x", IMM8: ARITHMETIC	0xde	2 8
 		{
 			REG_SUB	A, IMM8 + CF;
 
@@ -407,7 +407,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"AND %s": GROUP( 0xa0, 1, 8 )
+		"AND %s": ARITHMETIC	GROUP( 0xa0, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -419,13 +419,13 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"AND %02x", IMM8: 0xe6	2 8
+		"AND %02x", IMM8: ARITHMETIC	0xe6	2 8
 		{
 			ARITHMETIC ADD	REG(A), PARAM[0];
 		}
 
 
-		"XOR %s": GROUP( 0xa8, 1, 8 )
+		"XOR %s": ARITHMETIC	GROUP( 0xa8, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -437,13 +437,13 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"XOR %02x", IMM8: 0xee	2 8
+		"XOR %02x", IMM8: ARITHMETIC	0xee	2 8
 		{
 			ARITHMETIC ADD	REG(A), PARAM[0];
 		}
 
 
-		"OR %s": GROUP( 0xb0, 1, 8 )
+		"OR %s": ARITHMETIC	GROUP( 0xb0, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -455,13 +455,13 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"OR %02x", IMM8: 0xf6	2 8
+		"OR %02x", IMM8: ARITHMETIC	0xf6	2 8
 		{
 			ARITHMETIC ADD	REG(A), PARAM[0];
 		}
 
 
-		"CP A, %s": GROUP( 0xb8, 1, 8 )
+		"CP A, %s": ARITHMETIC	GROUP( 0xb8, 1, 8 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -481,7 +481,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"CP %02x", IMM8: 0xfe	2 8
+		"CP %02x", IMM8: ARITHMETIC	0xfe	2 8
 		{
 			local a = A;
 			REG_SUB	A, IMM8;

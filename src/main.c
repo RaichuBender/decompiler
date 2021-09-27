@@ -68,83 +68,135 @@ extern INSTRUCTION_SET REGULAR;
 BYTE *MEM;
 #define TEST_FILE ".pokeyellow.gbc"
 
+
+static const char OPERATION_COLOR[10][20] =
+{
+	/* INVALID    */ C_RED,
+	/* NOTHING    */ CB_BLACK,
+	/* SPECIAL    */ CB_WHITE,
+	/* MOV_STOR   */ CB_YELLOW,
+	/* ARITHMETIC */ CB_YELLOW,
+	/* BIT_MANIP  */ CB_YELLOW,
+	/* JUMP       */ CB_GREEN,
+	/* CALL       */ CB_CYAN,
+	/* RETURN     */ CB_MAGENTA,
+	/* END        */ NULL,		// TODO
+};
+
+static inline get_size(FILE *fp);
+
 int main(int argc, const char *argv[])
 {
 	FILE *fp = fopen(TEST_FILE, "rb");
 	if (fp == NULL)
 		exit(-1);
 
-	fseek(fp, 0L, SEEK_END);
-	int sz = ftell(fp);
-	fseek(fp, 0L, SEEK_SET);
+	int sz = get_size(fp);
 
 	MEM = malloc(sz);
 	fread(MEM, 0x400, sz / 0x400, fp);
 
-	int i = 0;
-NEXT_I:
-	while (i < sz)
+	int mem_byte = -1;
+
+	// TODO do proper size deduction
+	char *source_mnemonic	 = malloc(256);
+	char *formatted_mnemonic = malloc(256);
+
+	while (++mem_byte < sz)
 	{
-		for (int j = 0; j < 256; ++j)
+		for (int poll_instructions = 0; poll_instructions < 256; ++poll_instructions)
 		{
-			// char  tb[256];
-			// char *formatted_mnemonic = tb;
-			char *formatted_mnemonic = malloc(256); // TODO size deduction
-													// BUGBUG because this WILL cause segfaults
+			if  (REGULAR.instructions[poll_instructions].opcode   != MEM[mem_byte])	continue;
 
-			if (REGULAR.instructions[j].opcode != 0)
-				if (REGULAR.instructions[j].mnemonic != NULL)
-					if (REGULAR.instructions[j].opcode == MEM[i])
-					{
-						// TODO pretty sure this copy is redundant
-						strcpy(formatted_mnemonic, REGULAR.instructions[j].mnemonic);
+#ifdef	_SKIP_NOP
+			if ((REGULAR.instructions[poll_instructions].mnemonic == NULL)
+			||  (REGULAR.instructions[poll_instructions].opcode   == 0))			break;
+#else
+			if 	(REGULAR.instructions[poll_instructions].mnemonic == NULL)			break;
+#endif
 
-					/********************
-					*	@brief First	*	NOP
-					********************/
-						char *first = REGULAR.instructions[j].mnemonic;
+			strcpy(source_mnemonic, REGULAR.instructions[poll_instructions].mnemonic);
 
-					/********************
-					*	@brief Second	*	STIP 0
-					********************/
-						char *second = strchr(first, L' ');
-						if (second == NULL)
-							formatted_mnemonic = first;
-						else
-						{
-							*(second++) = 0;
+		/********************
+		*	@brief First	*	NOP
+		********************/
+			char *first = source_mnemonic;
 
-					/****************************
-					*	@brief Comma or space	*
-					****************************/
-							char delmtr = ',';
+		/********************
+		*	@brief Second	*	ST0P 0
+		********************/
+			char *second = strchr(first, L' ');
 
-					/********************
-					*	@brief Third	*	LD (HL), A
-					********************/
-							char *third = strchr(second, L',');
+			if (second != NULL)
+			{
+				*(second++) = '\0';
 
-							if (third == NULL)
-							{
-								third  = strchr(second, L' ');
-								delmtr = ' ';
-							}
-							if (third != NULL)
-								sprintf(formatted_mnemonic, "%s %s%c %s", first, second, delmtr, third);
-							else
-								sprintf(formatted_mnemonic, "%s %s", first, second);
-						}
+		/****************************
+		*	@brief Comma or space	*
+		****************************/
+				char delmtr = ',';
 
-						printf(C_MAGENTA "%02x" C_WHITE ":" CB_BLUE "%04x " CB_CYAN "%s\n" F_RESET, i >> 16, i & 0xffff,
-								formatted_mnemonic);
-					}
+		/********************
+		*	@brief Third	*	LD (HL), A
+		********************/
+				char *third = strchr(second, L',');
 
-			i += REGULAR.instructions[j].operand_count
-			  + (REGULAR.instructions[j].operand_count == 0);
+				if (third == NULL)
+				{
+					third  = strchr(second, L' ');
+					delmtr = ' ';
+				}
+				if (third == NULL)
+					sprintf(formatted_mnemonic, "%s%s "  C_CYAN "%s" F_RESET,
+							OPERATION_COLOR[REGULAR.instructions[poll_instructions].operation],
+							first, second);
+				else
+				{
+					*(third++) = '\0';
+					sprintf(formatted_mnemonic, "%s%s " C_CYAN "%s" F_RESET "%c " C_GREEN "%s" F_RESET ,
+							OPERATION_COLOR[REGULAR.instructions[poll_instructions].operation],
+							first, second, delmtr, third);
+				}
+			}	// if (second != NULL)
+			else
+				// strcpy(formatted_mnemonic, source_mnemonic);
+					sprintf(formatted_mnemonic, "%s%s "  F_RESET,
+							OPERATION_COLOR[REGULAR.instructions[poll_instructions].operation],
+							first);
 
-			goto NEXT_I;
+
+			printf(C_MAGENTA "%02x" C_WHITE ":" CB_BLUE "%04x\t\t" F_RESET "%s\n" F_RESET, mem_byte >> 16, mem_byte & 0xffff,
+					formatted_mnemonic);
+
+SKIP_PRINT:
+			mem_byte += REGULAR.instructions[poll_instructions].operand_count - 1;
+
 		}
+		// for (poll_instructions: 0 to 255)
 
-		++i;
 	}
+	// while (++mem_byte < sz)
+
+}
+
+
+/**********************************
+*
+*    @name	get_size
+*
+*	 @brief     In goes a FILE pointer,
+*               out comes it's file size
+*
+*    @param[in] fp	pointer to FILE
+*
+*    @return	int: file size
+* 
+**********************************/
+static inline get_size(FILE *fp)
+{
+	fseek(fp, 0L, SEEK_END);
+	int sz = ftell(fp);
+	fseek(fp, 0L, SEEK_SET);
+
+	return sz;
 }

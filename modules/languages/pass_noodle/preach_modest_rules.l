@@ -1,5 +1,5 @@
 /**********************************
-*
+ /*
 *	 @file      preach_modest.l
 *	 @author    Thomas Gijsbers (@RaichuBender)
 *	 @brief     Macro preprocessor lexer

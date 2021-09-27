@@ -51,6 +51,7 @@ char *INSTR_COUNT = NULL;
 char *CYCLES	  = NULL;
 
 OPCODE		  opcode	  = 0;
+char *		  operation	  = NULL;
 char *		  mnemonic	  = INVALID;
 int			  param_count = 0;
 PARAM_KIND *  params	  = NULL;

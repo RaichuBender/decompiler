@@ -18,10 +18,10 @@
 #define dbg_printf(fmt...)
 #endif
 
-	char *storage = NULL;
-	int token_scope = 0;
-	TOKEN_MODE tmd[SCOPE_MAX_DEPTH] = { UNSPECIFIED };
-	char *scope_name[SCOPE_MAX_DEPTH] = {"\0"};
+	char *	   storage					   = NULL;
+	int		   token_scope				   = 0;
+	TOKEN_MODE tmd[SCOPE_MAX_DEPTH]		   = {UNSPECIFIED};
+	char *	   scope_name[SCOPE_MAX_DEPTH] = {"\0"};
 
 %}
 
@@ -203,19 +203,19 @@ CYCLES:.+?$	{
 	ADD_TXT("/\/\t\t%s\n", start);
 }
 
-\".+?\"\s*:.*?GROUP\(\s*.+\s*\).*?$	{
+\".+?\"\s*:.*?GROUP\(\s*.+\s*\).*?$	{				// "{
 	INSTRUCTION_GROUP(yytext);
 }
 
-\".+?\"\s*,\s*.+\s*:.*?GROUP\(\s*.+\s*\).*?$	{
+\".+?\"\s*,\s*.+\s*:.*?GROUP\(\s*.+\s*\).*?$	{	// "{
 	INSTRUCTION_GROUP_PARAM(yytext);
 }
 
-\".+?\":\s*.+?$	{
+\".+?\":\s*.+?$	{									// "{
 	INSTRUCTION_(yytext);
 }
 
-\".+?\"\s*,\s*.+\s*:\s*.+?$	{
+\".+?\"\s*,\s*.+\s*:\s*.+?$	{						// "{
 	INSTRUCTION_PARAM(yytext);
 }
 

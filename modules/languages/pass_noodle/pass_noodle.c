@@ -25,7 +25,7 @@
 #endif // _SYNTAX
 
 
-typedef enum
+typedef enum _LEX_TYPE
 {
 	LEX_INVALID = 0,
 	LEX_L0,
@@ -530,9 +530,9 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 	(*end)	   = 0;
 	char *next = end + 1;
 
-/****************************************************#
-#	Instruction mnemonic parsable string			 #
-#****************************************************/
+/*****************************************************
+*	Instruction mnemonic parsable string			 *
+*****************************************************/
 	REPR = malloc(strlen(start) + 1);
 	strcpy(REPR, start);
 
@@ -541,18 +541,18 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 
 	switch (type)
 	{
-	case SINGLE_REGULAR:
+	// case SINGLE_REGULAR:
 	default:
 		goto SINGLE_skip_param;
 
 	// case SINGLE_PARAM:
 	// 	goto SINGLE_param;
 
-	// case GROUPING_REGULAR:
-	// 	goto GROUP_skip_param;
+	case GROUPING_REGULAR:
+		goto GROUP_skip_param;
 
-	// case GROUPING_PARAM:
-	// 	goto GROUP_param;
+	case GROUPING_PARAM:
+		goto GROUP_param;
 
 	// default:
 	// 	ASSERT(NULL != strchr(raw_str, L'\"'));
@@ -560,9 +560,9 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 	}
 	// return;
 
-/****************************************************#
-#	Instruction parameters in variadic array		 #
-#****************************************************/
+/*****************************************************
+*	Instruction parameters in variadic array		 *
+*****************************************************/
 	char *prm_start;
 	char *prm_end;
 
@@ -605,17 +605,33 @@ SINGLE_param:
 		prm_start = strchr(prm_start, L',');
 	}
 
-/****************************************************#
-#	Instruction's unique OP code					 #
-#****************************************************/
-	char *op_start;
-	char *op_end;
+/*****************************************************
+*	Instruction type								 *
+*****************************************************/
+	char *type_start;
+	char *type_end;
 
 
 SINGLE_skip_param:
 
 
-	op_start = strchr(next, L':') + 1;
+	type_start = strchr(next, L':') + 1;
+
+	SKIP_WHITESPACE(type_start);
+	SEEK_WHITESPACE(type_end, type_start);
+
+	(*type_end) = 0;
+	next	  	= type_end + 1;
+
+	operation = malloc(strlen(type_end) + 1);
+	strcpy(operation, type_start);
+
+
+/*****************************************************
+*	Instruction's unique OP code					 *
+*****************************************************/
+	char *op_start = next;
+	char *op_end;
 
 	SKIP_WHITESPACE(op_start);
 	SEEK_WHITESPACE(op_end, op_start);
@@ -625,9 +641,10 @@ SINGLE_skip_param:
 
 	opcode	  = strtoull(op_start, NULL, 16);
 
-/****************************************************#
-#	Bytes count of instruction (opcode + operands)	 #
-#****************************************************/
+
+/*****************************************************
+*	Bytes count of instruction (opcode + operands)	 *
+*****************************************************/
 	char *cnt_start = next;
 	char *cnt_end;
 
@@ -640,7 +657,9 @@ SINGLE_skip_param:
 	instr_count = strtoul(cnt_start, NULL, 10);
 
 
-	// Machine ticks in relative clock cycles
+/*****************************************************
+*	Machine ticks in relative clock cycles			 *
+*****************************************************/
 	char *cy_start = next;
 	char *cy_end;
 
@@ -656,26 +675,74 @@ SINGLE_skip_param:
 	// if (param_count > 0)
 	// ...
 
-	INDENT(token_scope);
-	ADD_TXT("/* REPR:        */  \"%s\",\n", REPR);
-	INDENT(token_scope);
-	ADD_TXT("/* opcode:      */  0x%02x,\n", opcode);
-	INDENT(token_scope);
-	ADD_TXT("/* instr_count: */  %d,\n", instr_count);
-	INDENT(token_scope);
-	ADD_TXT("/* cycles:      */  %d,\n", cycles);
-
+	INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", REPR);
+	INDENT(token_scope);	ADD_TXT("/* opcode:      */  0x%02x,\n", opcode);
+	INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);
+	INDENT(token_scope);	ADD_TXT("/* instr_count: */  %d,\n",	 instr_count);
+	INDENT(token_scope);	ADD_TXT("/* cycles:      */  %d,\n",	 cycles);
 
 	return;
 
 
-GROUP_param:		// TODD: implement groupings
+GROUP_param:		// TODO: implement groupings
 GROUP_skip_param:
 
+/*****************************************************
+*	Instruction type								 *
+*****************************************************/
+	type_start = strchr(next, L':') + 1;
 
-	INDENT(token_scope);
-	ADD_TXT("/* REPR:        */  \"%s\",\n", REPR);
+	SKIP_WHITESPACE(type_start);
+	SEEK_WHITESPACE(type_end, type_start);
 
+	(*type_end) = 0;
+	next	  	= type_end + 1;
+
+	operation = malloc(strlen(type_end) + 1);
+	strcpy(operation, type_start);
+
+
+/*****************************************************
+*	Instruction's unique OP code					 *
+*****************************************************/
+	op_start = strchr(next, L'(') + 1;
+
+	SKIP_WHITESPACE(op_start);
+	SEEK_WHITESPACE(op_end, op_start);
+
+	(*op_end) = 0;
+	next	  = op_end + 1;
+
+	opcode	  = strtoull(op_start, NULL, 16);
+
+
+/*****************************************************
+*	Bytes count of instruction (opcode + operands)	 *
+*****************************************************/
+	cnt_start = next;
+
+	SKIP_WHITESPACE(cnt_start);
+	SEEK_WHITESPACE(cnt_end, cnt_start + 1);	// TODO group count
+
+	(*cnt_end) = 0;
+	next	   = cnt_end + 1;
+
+	instr_count = strtoul(cnt_start, NULL, 10);
+
+
+/*****************************************************
+*	Machine ticks in relative clock cycles			 *
+*****************************************************/
+
+	cycles = 0;	// TODO group cycles
+
+	free(raw_str);
+
+	INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", REPR);
+	INDENT(token_scope);	ADD_TXT("/* opcode:      */  0x%02x,\n", opcode);
+	INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);
+	INDENT(token_scope);	ADD_TXT("/* instr_count: */  %d,\n",	 instr_count);
+	INDENT(token_scope);	ADD_TXT("/* cycles:      */  %d,\n",	 cycles);
 
 	return;
 

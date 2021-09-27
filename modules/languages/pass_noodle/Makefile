@@ -23,10 +23,10 @@ pass_noodle:		pass_noodle.gen.h
 preach_modest:		preach_modest.gen.h
 	$(MAKE) $(EXE_PR)
 
-pass_noodle.gen.h:	pass_noodle.l
+pass_noodle.gen.h:	pass_noodle_rules.l
 	flex -o $@ $^
 
-preach_modest.gen.h:	preach_modest.l
+preach_modest.gen.h:	preach_modest_rules.l
 	flex -o $@ $^
 
 $(EXE_PA):		pass_noodle.o
