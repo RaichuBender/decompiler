@@ -215,24 +215,52 @@ typedef unsigned char BOOL;
 /* Quickly disable assertiom by simply adding a 'd' in front */
 #define dASSERT(cond)
 
+
 #ifndef _TRACE_FILENAME
+
 #define TRACE_CODE(code)                                    \
 	fprintf(stderr, __FILE__ ":%d: %s\n", __LINE__, #code); \
 	code;
+
 #else // _TRACE_FILENAME
+
 #define TRACE_CODE(code)            \
 	fprintf(stderr, "%s\n", #code); \
 	code;
+
 #endif // _TRACE_FILENAME
-#define DBG_TRACE(sym) 
-// #define DBG_TRACE(sym)                                  \
-// 	{                                                   \
-// 		fprintf(stderr, "%s: *(0x%08x)\n", #sym, &sym); \
-// 	}
+
+#if 1
+
+#define DBG_TRACE(sym)
+
+#else
+
+#define DBG_TRACE(sym)                                  \
+	{                                                   \
+		fprintf(stderr, "%s: *(0x%08x)\n", #sym, &sym); \
+	}
+
+#endif // 1
+
+// HACK fix for preprocessor
+#ifdef __PREACH_MODEST_H__
+
 #define DBG_TRACEL(sym)                \
 	{                                  \
 		fprintf(stderr, "%s\n", #sym); \
 	}
+
+#else
+
+extern int token_scope;
+#define DBG_TRACEL(sym)                                 \
+	{                                                   \
+		ASSERT(token_scope >= 0);                       \
+		fprintf(stderr, "%d\t%s\n", token_scope, #sym); \
+	}
+
+#endif
 
 /**********************************
 *

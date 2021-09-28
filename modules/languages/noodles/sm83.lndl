@@ -176,13 +176,12 @@ LANGUAGE(sm83_asm)
 		"HALT":		SPECIAL	0x76	1 4
 		{
 			NO_OP;	// TODO
-
 		}
 
 	# 8-bit Loads:
 MACRO:LOAD( _REG_, _OP_B_ )
 =BEGIN
-		"LD _REG_, %s": MOV_STOR	GROUP( _OP_B_, 1, 8 )
+		"LD _REG_, %s": MOV_STOR	GROUP( _OP_B_, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -204,8 +203,8 @@ MACRO:LOAD( _REG_, _OP_B_ )
 
 		"LD (HL), %s": MOV_STOR	GROUP( 0x70, 6, 1 )
 		{
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)    }
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"   }
+			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)    }
 			INSTR_COUNT:	1
 			CYCLES:			8
 
@@ -234,7 +233,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 	# 16-bit Loads:
-		"LD %s, A", IMM8: MOV_STOR	GROUP( 0x06, 16, 2 )
+		"LD %s, A", IMM8: MOV_STOR	GROUP( 0x06, 4, 16 )
 		{
 			REPR:	{	"(BC)"    "(DE)"    "(HL+)"    "(HL-)"   }
 			PARAM:	{	REG_ADR(BC)     REG_ADR(DE)     REG_ADR(HL)   REG_ADR(HL)  }
@@ -293,7 +292,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"ADD A, %s": ARITHMETIC	GROUP( 0x80, 1, 8 )
+		"ADD A, %s": ARITHMETIC	GROUP( 0x80, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -321,7 +320,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"ADC A, %s": ARITHMETIC	GROUP( 0x88, 1, 8 )
+		"ADC A, %s": ARITHMETIC	GROUP( 0x88, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -351,7 +350,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"SUB %s": ARITHMETIC	GROUP( 0x90, 1, 8 )
+		"SUB %s": ARITHMETIC	GROUP( 0x90, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -379,7 +378,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"SBC A, %s": ARITHMETIC	GROUP( 0x98, 1, 8 )
+		"SBC A, %s": ARITHMETIC	GROUP( 0x98, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -407,7 +406,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"AND %s": ARITHMETIC	GROUP( 0xa0, 1, 8 )
+		"AND %s": ARITHMETIC	GROUP( 0xa0, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -425,7 +424,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"XOR %s": ARITHMETIC	GROUP( 0xa8, 1, 8 )
+		"XOR %s": ARITHMETIC	GROUP( 0xa8, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -443,7 +442,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"OR %s": ARITHMETIC	GROUP( 0xb0, 1, 8 )
+		"OR %s": ARITHMETIC	GROUP( 0xb0, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
@@ -461,7 +460,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"CP A, %s": ARITHMETIC	GROUP( 0xb8, 1, 8 )
+		"CP A, %s": ARITHMETIC	GROUP( 0xb8, 8, 1 )
 		{
 			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
 			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }

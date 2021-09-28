@@ -242,4 +242,9 @@ void INSTRUCTION_GROUP_PARAM(char *yytext);
 void INSTRUCTION_(char *yytext);
 void INSTRUCTION_PARAM(char *yytext);
 
+void DECODE_REPR(BOOL bMulti);
+void DECODE_PARAM(BOOL bMulti);
+void DECODE_INSTR_COUNT(BOOL bMulti);
+void DECODE_CYCLES(BOOL bMulti);
+
 #endif // __PASS_NOODLE_H__

@@ -145,45 +145,98 @@ FLAG\s*\(\s*.+\s*\)	{
 	}
 }
 
-REPR:.+?$	{
-	DBG_TRACEL(_REPR); /* ++token_scope; */
+
+
+^\s*REPR:[^\}\{]*	{
+	DBG_TRACEL(_REPR_GS);
 	char *start = strchr(yytext, L':');
 	while (((*start) == ' ') || ((*start) == '\t'))
 		++start;
 
 	REPR = malloc(strlen(start) + 1);
 	strcpy(REPR, start);
+	DECODE_REPR(0);
 }
 
-PARAM:.+?$	{
-	DBG_TRACEL(_PARAM); /* ++token_scope; */
+REPR:.*\{.*\}	{
+	DBG_TRACEL(_REPR_GG);
+	char *start = strchr(yytext, L':');
+	while (((*start) == ' ') || ((*start) == '\t'))
+		++start;
+
+	REPR = malloc(strlen(start) + 1);
+	strcpy(REPR, start);
+	DECODE_REPR(1);
+}
+
+^\s*PARAM:[^\}\{]*		{
+	DBG_TRACEL(_PARAM_GS);
 	char *start = strchr(yytext, L':');
 	while (((*start) == ' ') || ((*start) == '\t'))
 		++start;
 
 	PARAM = malloc(strlen(start) + 1);
 	strcpy(PARAM, start);
+	DECODE_PARAM(0);
 }
 
-INSTR_COUNT:.+?$	{
-	DBG_TRACEL(_INSTR_COUNT); /* ++token_scope; */
+PARAM:.*\{.*\}			{
+	DBG_TRACEL(_PARAM_GG);
+	char *start = strchr(yytext, L':');
+	while (((*start) == ' ') || ((*start) == '\t'))
+		++start;
+
+	PARAM = malloc(strlen(start) + 1);
+	strcpy(PARAM, start);
+	DECODE_PARAM(1);
+}
+
+
+^\s*INSTR_COUNT:[^\}\{]*	{
+	DBG_TRACEL(_INSTR_COUNT_GS);
 	char *start = strchr(yytext, L':');
 	while (((*start) == ' ') || ((*start) == '\t'))
 		++start;
 
 	INSTR_COUNT = malloc(strlen(start) + 1);
 	strcpy(INSTR_COUNT, start);
+	DECODE_INSTR_COUNT(0);
 }
 
-CYCLES:.+?$	{
-	DBG_TRACEL(_CYCLES); /* ++token_scope; */
+INSTR_COUNT:.*\{.*\}		{
+	DBG_TRACEL(_INSTR_COUNT_GG);
+	char *start = strchr(yytext, L':');
+	while (((*start) == ' ') || ((*start) == '\t'))
+		++start;
+
+	INSTR_COUNT = malloc(strlen(start) + 1);
+	strcpy(INSTR_COUNT, start);
+	DECODE_INSTR_COUNT(1);
+}
+
+
+^\s*CYCLES:[^\}\{]*		{
+	DBG_TRACEL(_CYCLES_GS);
 	char *start = strchr(yytext, L':');
 	while (((*start) == ' ') || ((*start) == '\t'))
 		++start;
 
 	CYCLES = malloc(strlen(start) + 1);
 	strcpy(CYCLES, start);
+	DECODE_CYCLES(0);
 }
+
+CYCLES:.*\{.*\}	{
+	DBG_TRACEL(_CYCLES_GG);
+	char *start = strchr(yytext, L':');
+	while (((*start) == ' ') || ((*start) == '\t'))
+		++start;
+
+	CYCLES = malloc(strlen(start) + 1);
+	strcpy(CYCLES, start);
+	DECODE_CYCLES(1);
+}
+
 
 ^\s*.+?;$	{
 	DBG_TRACEL(_LOGIC);
@@ -226,4 +279,3 @@ CYCLES:.+?$	{
 %%
 
 // \#.+?\n	{	DBG_TRACEL(_COMMENT); }
-

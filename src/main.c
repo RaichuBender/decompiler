@@ -156,8 +156,8 @@ int main(int argc, const char *argv[])
 			}
 			printf(C_MAGENTA "%02x" C_WHITE ":" CB_BLUE "%04x\t\t" F_RESET "%s\n" F_RESET, mem_byte >> 16, ((mem_byte > 0x3fff) << 14) | mem_byte & 0x7fff,
 					formatted_mnemonic);
-			if (0==strcmp(REGULAR.instructions[poll_instructions].mnemonic, "RET"))
-				return 0;
+			// if (0==strcmp(REGULAR.instructions[poll_instructions].mnemonic, "RET"))
+			// 	return 0;
 
 SKIP_PRINT:
 			mem_byte += REGULAR.instructions[poll_instructions].operand_count - 1;

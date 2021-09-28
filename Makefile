@@ -53,6 +53,12 @@ all:
 	@$(MAKE) default	-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
 	@$(MAKE) clean		-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
 
+r:
+	@$(MAKE) default	-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=FALSE'	-E'override ADD_SUFFIX:=TRUE'
+rs:
+	@$(MAKE) default	-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
+
+
 $(EXE):		$(OBJECTS) $(LANG_OBJECTS)
 	$(CC) -o $@	$^ $(CFLAGS) $(INCLUDE) $(LIB)
 

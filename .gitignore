@@ -12,6 +12,7 @@ build
 *.so
 
 main
+main_*
 pass_noodle_tool
 preach_modest_tool
 *.ndl.c
