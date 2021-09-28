@@ -46,6 +46,7 @@ typedef struct
 typedef unsigned long long OPCODE;
 
 char *REPR		  = NULL;
+char *REPR2		  = NULL;
 char *PARAM		  = NULL;
 char *INSTR_COUNT = NULL;
 char *CYCLES	  = NULL;

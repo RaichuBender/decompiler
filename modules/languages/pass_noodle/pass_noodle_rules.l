@@ -135,8 +135,10 @@ FLAG\s*\(\s*.+\s*\)	{
 		{
 			INDENT(--token_scope);
 			ADD_TXT("},\n")
-			DECODE_INSTR();
+			// DECODE_INSTR();
 		}
+		else
+			DECODE_INSTR();
 	}
 	else
 	{
@@ -153,8 +155,8 @@ FLAG\s*\(\s*.+\s*\)	{
 	while (((*start) == ' ') || ((*start) == '\t'))
 		++start;
 
-	REPR = malloc(strlen(start) + 1);
-	strcpy(REPR, start);
+	REPR2 = malloc(strlen(start) + 1);
+	strcpy(REPR2, start);
 	DECODE_REPR(0);
 }
 
@@ -164,8 +166,8 @@ REPR:.*\{.*\}	{
 	while (((*start) == ' ') || ((*start) == '\t'))
 		++start;
 
-	REPR = malloc(strlen(start) + 1);
-	strcpy(REPR, start);
+	REPR2 = malloc(strlen(start) + 1);
+	strcpy(REPR2, start);
 	DECODE_REPR(1);
 }
 
