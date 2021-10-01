@@ -131,14 +131,21 @@ FLAG\s*\(\s*.+\s*\)	{
 	if (tmd[token_scope] == LOGIC)
 	{
 		ADD_TXT("\n");
-		if (tmd[--token_scope] == INSTR)
+		if (tmd[--token_scope] == INSTR_GROUPING)
 		{
-			INDENT(--token_scope);
-			ADD_TXT("},\n")
-			// DECODE_INSTR();
+			// --token_scope;
+			DECODE_INSTR();
 		}
 		else
-			DECODE_INSTR();
+		{
+			INDENT(token_scope);	ADD_TXT("/* logic:       */  %s,\n",	 sLOGIC);
+			INDENT(--token_scope);
+			ADD_TXT("},\n");
+		}
+	}
+	else if (tmd[token_scope] == INSTR_GROUPING)
+	{
+		--token_scope;
 	}
 	else
 	{
@@ -163,6 +170,7 @@ FLAG\s*\(\s*.+\s*\)	{
 REPR:.*\{.*\}	{
 	DBG_TRACEL(_REPR_GG);
 	char *start = strchr(yytext, L':');
+	ASSERT(start != NULL)
 	while (((*start) == ' ') || ((*start) == '\t'))
 		++start;
 
@@ -239,6 +247,39 @@ CYCLES:.*\{.*\}	{
 	DECODE_CYCLES(1);
 }
 
+
+\".+?;?\\n\"$	{
+	DBG_TRACEL(_LOGIC_REPR);
+
+	if (tmd[token_scope] != LOGIC)
+	{
+		ADD_TXT("\n");
+		tmd[++token_scope] = LOGIC;
+	}
+
+	INDENT(token_scope - 1);
+	char *start = yytext;
+
+	while (((*start) == ' ')||((*start) == '\t'))
+		++start;
+
+	if (sLOGIC == NULL)
+	{
+		size_t sz = strlen(start) + 5;
+		sLOGIC = malloc(sz);
+		strcpy(sLOGIC, start);
+	}
+	else
+	{
+		size_t sz = strlen(sLOGIC) + strlen(start) + 5;
+		char *tmp = malloc(sz);
+		sprintf(tmp, "%s%s", sLOGIC, start);
+		free(sLOGIC);
+		sLOGIC = tmp;
+	}
+
+	ADD_TXT("/\/\t\t%s\n", start);
+}
 
 ^\s*.+?;$	{
 	DBG_TRACEL(_LOGIC);

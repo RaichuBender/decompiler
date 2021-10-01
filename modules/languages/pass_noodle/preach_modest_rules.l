@@ -39,7 +39,7 @@ MACRO:[a-zA-Z0-9_]+?\(.*?\)(.*?\n.*)*?=BEGIN(.*?\n.*)*?=END	{
 	DBG_TRACEL(macro2);
 	dbg_printf("%s ::\n%s\n\n\n", "MACRO:[a-zA-Z0-9_]+?\\(.*?\\)(.*?\\n.*)*?=BEGIN(.*?\\n.*)*?=END", yytext);
 	MACRO *macro = &macro_list[macro_count];
-	char *macro_begin = PROCESS_MACRO(yytext, EXPANDS_NO_ARGS_HAS_BRACKETS);
+	char *macro_begin = PROCESS_MACRO(yytext, EXPANDS_NO_ARGS_HAS_PARENTHESES);
 	EXPAND_MACRO(macro_begin);
 	PROCESS_MACRO_EXPANSION();
 	OUTPUT_DBG_DOC(" *\t@return *** PREVIEW ***\n\t%s\n", macro->expand);
@@ -52,7 +52,7 @@ MACRO:[a-zA-Z0-9_]+?(.*?\n.*)*?=BEGIN(.*?\n.*)*?=END	{
 	DBG_TRACEL(macro3);
 	dbg_printf("%s ::\n%s\n\n\n", "MACRO:[a-zA-Z0-9_]+?(.*?\\n.*)*?=BEGIN(.*?\\n.*)*?=END", yytext);
 	MACRO *macro = &macro_list[macro_count];
-	char *macro_begin = PROCESS_MACRO(yytext, EXPANDS_NO_ARGS_NO_BRACKETS);
+	char *macro_begin = PROCESS_MACRO(yytext, EXPANDS_NO_ARGS_NO_PARENTHESES);
 	EXPAND_MACRO(macro_begin);
 	PROCESS_MACRO_EXPANSION();
 	OUTPUT_DBG_DOC(" *\t@return *** PREVIEW ***\n\t%s\n", macro->expand);
@@ -65,7 +65,7 @@ MACRO:[a-zA-Z0-9_]+?\(\).*?\n 	{
 	DBG_TRACEL(macro4);
 	dbg_printf("%s ::\n%s\n\n\n", "MACRO:[a-zA-Z0-9_]+?\\(\\).*?\\n", yytext);
 	MACRO *macro = &macro_list[macro_count];
-	PROCESS_MACRO(yytext, STUB_NO_ARGS_HAS_BRACKETS);
+	PROCESS_MACRO(yytext, STUB_NO_ARGS_HAS_PARENTHESES);
 	OUTPUT_DBG_DOC(" *\t@return\tNothing.\n");
 	OUTPUT_DBG_DOC(" */\n");
 	OUTPUT_DBG_DOC("#define  dummy_macro__%s  (...)\n\n", macro->argv[0]);
@@ -87,7 +87,7 @@ MACRO:[a-zA-Z0-9_]+?.*?\n		{
 	DBG_TRACEL(macro6);
 	dbg_printf("%s ::\n%s\n\n\n", "MACRO:[a-zA-Z0-9_]+?.*?\\n", yytext);
 	MACRO *macro = &macro_list[macro_count];
-	PROCESS_MACRO(yytext, STUB_NO_ARGS_NO_BRACKETS);
+	PROCESS_MACRO(yytext, STUB_NO_ARGS_NO_PARENTHESES);
 	OUTPUT_DBG_DOC(" *\t@return\tNothing.\n");
 	OUTPUT_DBG_DOC(" */\n");
 	OUTPUT_DBG_DOC("#define  dummy_macro__%s  (...)\n\n", macro->argv[0]);

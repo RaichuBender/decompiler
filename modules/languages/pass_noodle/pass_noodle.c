@@ -11,18 +11,18 @@
 *
 **********************************/
 
-#ifndef _SYNTAX
+#ifndef _DEBUG
 
 #include "pass_noodle.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#else // _SYNTAX
+#else // _DEBUG
 
 #include "pass_noodle.gen.h"
 
-#endif // _SYNTAX
+#endif // _DEBUG
 
 
 #define LEX(_type_)  \
@@ -55,7 +55,6 @@
 		while (((*pDST) == ' ') || ((*pDST) == '\t')) \
 			++pDST;                                   \
 	}
-
 
 /**********************************
 *
@@ -125,17 +124,25 @@
 		ASSERT(pDST != NULL);        \
 	}
 
+#define PREVIEW_INSTR(_TYPE_, _type_)             \
+	{                                             \
+		INDENT(token_scope);                      \
+		ADD_TXT("/** INSTRUCTION " #_type_ "\n"); \
+		INDENT(token_scope);                      \
+		ADD_TXT("  * %s */\n", yytext);           \
+		++token_scope;                            \
+		tmd[token_scope] = _TYPE_;                \
+	}
 
-#define PREVIEW_INSTR(_TYPE_, _type_)         \
-	INDENT(token_scope);                      \
-	ADD_TXT("/** INSTRUCTION " #_type_ "\n"); \
-	INDENT(token_scope);                      \
-	ADD_TXT("  * %s */\n", yytext);           \
-	INDENT(token_scope);                      \
-	ADD_TXT("{\n");                           \
-	++token_scope;                            \
-	tmd[token_scope] = _TYPE_;
-
+#define PREVIEW_INSTR_GROUP(_TYPE_, _type_)       \
+	{                                             \
+		INDENT(token_scope);                      \
+		ADD_TXT("/** INSTRUCTION " #_type_ "\n"); \
+		INDENT(token_scope);                      \
+		ADD_TXT("  * %s */\n", yytext);           \
+		++token_scope;                            \
+		tmd[token_scope] = _TYPE_;                \
+	}
 
 /*********************************
 *
@@ -211,6 +218,7 @@ char *grouping_end[64];
 /*	  Store pointer to restore	*/
 char *pTxtCpy		   = NULL;
 int	  grouping_counter = 0;
+
 
 /*********************************
 *
@@ -675,6 +683,7 @@ static inline char *PROC_CYCLES(char *cy_start)
 int	  group_cnt;
 int	  group_ofs;
 char  REPR_ARR[64][32];
+char  PARAM_ARR[64][32];
 int	  instr_count_ARR[64];
 int	  cycles_ARR[64];
 
@@ -729,12 +738,16 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 
 		free(raw_str);
 
+		INDENT(token_scope - 1);ADD_TXT("{\n");
+
 		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", REPR);
 		INDENT(token_scope);	ADD_TXT("/* opcode:      */  0x%02x,\n", opcode);
 		INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);
 		INDENT(token_scope);	ADD_TXT("/* instr_count: */  %d,\n",	 instr_count);
 		INDENT(token_scope);	ADD_TXT("/* cycles:      */  %d,\n",	 cycles);
 		INDENT(token_scope);	ADD_TXT("/* PARAM:       */  %d,\n",     imm_chars);
+
+		// INDENT(token_scope - 1);ADD_TXT("},\n");
 
 		return;
 
@@ -776,7 +789,7 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 		group_cnt = strtoul(grcnt_s, NULL, 0);
 
 		char *grofs_s = next;
-	
+
 		group_ofs = strtoul(grofs_s, NULL, 0);
 		grouping_counter = 0;
 
@@ -785,51 +798,117 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 
 	default:
 		ASSERT(NULL != strchr(raw_str, L'\"'));
+		free(raw_str);
 		break;
 	}
 	return;
 }
 
+
 void DECODE_REPR(BOOL bMulti)
 {
-	char *repr_s = strchr(REPR2, L':') + 1;
-	char *repr_e = repr_s + strlen(repr_s);
+	char *repr_s;
+	char *repr_e;
 
+	ASSERT(REPR2 != NULL);
+
+	if (bMulti == TRUE)
+		goto MULTI;
+
+//\
+SINGLE:
+	repr_s = strchr(REPR2, L':') + 1;
+	repr_e = repr_s + strlen(repr_s);
 	ASSERT((repr_s != NULL) && (repr_e != NULL))
-
-	// if (bMulti == TRUE)
-	// 	goto MULTI;
-
-// SINGLE:
 	SKIP_WHITESPACE(repr_s);
 	SKIP_WHITESPACE_BCKWDS(repr_e);
 
 	for (int i = 0; i < group_cnt; ++i)
 		strcpy(REPR_ARR[i], repr_s);
 
+	return;
 
-// MULTI:
+MULTI:
+	repr_s = strchr(REPR2, L'{') + 1;
+	repr_e = strchr(repr_s, L'}');
+	ASSERT((repr_s != NULL) && (repr_e != NULL));
+	// SKIP_WHITESPACE(repr_s);
+	char *token = strchr(repr_s, L'"') + 1;
+	char *delim;
+	char *comma;
+
+	int	  i = 0;
+	for (	comma = strchr(token, L',')
+		;	comma != NULL
+		;	comma = strchr(token,  L',')	)
+		{
+			delim = strchr(token, L'"');//comma;
+			ASSERT((delim != NULL) && (token != NULL));
+			SKIP_WHITESPACE(token);
+			*(delim++) = 0;
+			strcpy(REPR_ARR[i++], token);
+			token = strchr(delim, L'"') + 1;
+		}
+
+	delim = strchr(token, L'"');//L'}');
+	ASSERT((delim != NULL) && (token != NULL));
+	*delim = 0;
+	strcpy(REPR_ARR[i], token);
 }
+
+
 void DECODE_PARAM(BOOL bMulti)
 {
-	char *param_s = strchr(PARAM, L':') + 1;
-	char *param_e = param_s + strlen(param_s);
+	char *param_s;
+	char *param_e;
 
+	ASSERT(PARAM != NULL);
+
+	if (bMulti == TRUE)
+		goto MULTI;
+
+//\
+SINGLE:
+	param_s = strchr(PARAM, L':') + 1;
+	param_e = param_s + strlen(param_s);
 	ASSERT((param_s != NULL) && (param_e != NULL))
-
-	// if (bMulti == TRUE)
-	// 	goto MULTI;
-
-// SINGLE:
 	SKIP_WHITESPACE(param_s);
 	SKIP_WHITESPACE_BCKWDS(param_e);
 
-	// for (int i = 0; i < group_cnt; ++i)
-	// 	stcpy(REPR_ARR[i], param_s);	// TODO
+	for (int i = 0; i < group_cnt; ++i)
+		strcpy(PARAM_ARR[i], param_s);	// TODO
 
+	return;
 
-// MULTI:
+MULTI:
+	param_s = strchr(PARAM, L'{') + 1;
+	param_e = strchr(param_s, L'}');
+	ASSERT((param_s != NULL) && (param_e != NULL));
+	SKIP_WHITESPACE(param_s);
+	char *token = param_s;
+	char *delim;
+	char *comma;
+
+	int	  i = 0;
+	for (	comma = strchr(param_s, L',')
+		;	comma != NULL
+		;	comma = strchr(comma,  L',')	)
+		{
+			delim = comma;
+			ASSERT((delim != NULL) && (token != NULL) && (PARAM_ARR[i] != NULL));
+			SKIP_WHITESPACE(token);
+			*delim = 0;
+			strcpy(PARAM_ARR[i++], token);
+			token = delim + 1;
+		}
+
+	delim = strchr(token,  L'}');
+	ASSERT((delim != NULL) && (token != NULL) && (PARAM_ARR[i] != NULL));
+	*delim = 0;
+	strcpy(PARAM_ARR[i], token);
 }
+
+#if 0
 void DECODE_INSTR_COUNT(BOOL bMulti)
 {
 	char *count_s = strchr(INSTR_COUNT, L':') + 1;
@@ -837,8 +916,8 @@ void DECODE_INSTR_COUNT(BOOL bMulti)
 
 	ASSERT((count_s != NULL) && (count_e != NULL))
 
-	// if (bMulti == TRUE)
-	// 	goto MULTI;
+	if (bMulti == TRUE)
+		goto MULTI;
 
 // SINGLE:
 	SKIP_WHITESPACE(count_s);
@@ -847,9 +926,17 @@ void DECODE_INSTR_COUNT(BOOL bMulti)
 	for (int i = 0; i < group_cnt; ++i)
 		instr_count_ARR[i] = strtol(count_s, NULL, 0);
 
+	return;
 
-// MULTI:
+	char *delim;
+MULTI:
+	for (	delim = strchr(count_s, L',')
+		;	delim != NULL
+		;	delim = strchr(delim, L',')	)
+		;
 }
+
+
 void DECODE_CYCLES(BOOL bMulti)
 {
 	char *cycl_s = strchr(CYCLES, L':') + 1;
@@ -857,8 +944,8 @@ void DECODE_CYCLES(BOOL bMulti)
 
 	ASSERT((cycl_s != NULL) && (cycl_e != NULL))
 
-	// if (bMulti == TRUE)
-	// 	goto MULTI;
+	if (bMulti == TRUE)
+		goto MULTI;
 
 // SINGLE:
 	SKIP_WHITESPACE(cycl_s);
@@ -867,10 +954,19 @@ void DECODE_CYCLES(BOOL bMulti)
 	for (int i = 0; i < group_cnt; ++i)
 		cycles_ARR[i] = strtol(cycl_s, NULL, 0);
 
+	return;
 
-// MULTI:
+	char *delim;
+MULTI:
+	for (	delim = strchr(cycl_s, L',')
+		;	delim != NULL
+		;	delim = strchr(delim, L',')	)
+		;
 }
-
+#else	// TODO
+void DECODE_INSTR_COUNT(BOOL bMulti){}
+void DECODE_CYCLES(BOOL bMulti){}
+#endif
 
 /**********************************
 *
@@ -880,58 +976,53 @@ void DECODE_CYCLES(BOOL bMulti)
 void DECODE_INSTR(void)
 {
 	DBG_TRACEL(\n# ^ DECODE_INSTR ^ #\n\n);
-	// if (opcode == 0xf6)	exit(-1);
 
-	// if (grouping_counter == 0) return;
+	char *tmp = malloc(256);
+	char *tmp_logic = malloc(strlen(sLOGIC) * 2);
 
+	grouping_counter = 0;
 	for (	int op_c = opcode
 		;	op_c < (opcode + group_ofs * group_cnt)
-		;	op_c +=	({	INDENT(token_scope - 1);
-						ADD_TXT("{\n");
-						group_ofs;	})	)
+		;	op_c +=	({INDENT(token_scope - 1);ADD_TXT("},\n");group_ofs;})	)
 	{
-		// pTxt = grouping_buf[grouping_counter];
-#define ADD_TXT(fmt...)             \
-	{                               \
-		pTxt += sprintf(pTxt, fmt); \
-		fprintf(stderr, fmt);       \
-	}
-		char *tmp = malloc(256);
-		sprintf(tmp, REPR, "B");//REPR_ARR[grouping_counter]);
-		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", tmp);	free(tmp);
+		INDENT(token_scope - 1);ADD_TXT("{\n");
+
+		sprintf(tmp_logic, sLOGIC, REPR_ARR[grouping_counter]);
+		sprintf(tmp, REPR, REPR_ARR[grouping_counter]);
+		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", tmp);
 		INDENT(token_scope);	ADD_TXT("/* opcode:      */  0x%02x,\n", op_c);
 		INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);
-		INDENT(token_scope);	ADD_TXT("/* instr_count: */  1,\n",		 instr_count_ARR[grouping_counter]);
+		INDENT(token_scope);	ADD_TXT("/* instr_count: */  1,\n",		 instr_count_ARR[grouping_counter++]);
 		INDENT(token_scope);	ADD_TXT("/* cycles:      */  4,\n",		 4);//cycles_ARR[grouping_counter]);
 		INDENT(token_scope);	ADD_TXT("/* PARAM:       */  %d,\n",	 imm_chars);
-		INDENT(token_scope - 1);ADD_TXT("},\n");
-		// grouping_end[grouping_counter++] = pTxt;
-#define ADD_TXT(fmt...)             \
-	{                               \
-		pTxt += sprintf(pTxt, fmt); \
+		INDENT(token_scope);	ADD_TXT("/* logic:       */  %s,\n",	 tmp_logic);
 	}
-	}
-	// grouping_buf[grouping_counter][0] = '\0';
-	// grouping_end[grouping_counter]	  = NULL;
+
+	free(tmp_logic);
+	free(tmp);
 }
 
 void INSTRUCTION_GROUP(char *yytext)
 {
 	DBG_TRACEL(_INSTRUCTION_GROUP);
-	PREVIEW_INSTR(INSTR_GROUPING, gn);
+	PREVIEW_INSTR_GROUP(INSTR_GROUPING, gn);
 
 	char *raw_str = malloc(strlen(yytext) + 8); // HACK larger buffer to circumvent segfault
 	strcpy(raw_str, yytext);
 	PROC_INSTR(raw_str, GROUPING_REGULAR);
+	free(sLOGIC);
+	sLOGIC = NULL;
 }
 void INSTRUCTION_GROUP_PARAM(char *yytext)
 {
 	DBG_TRACEL(_INSTRUCTION_GROUP_PARAM);
-	PREVIEW_INSTR(INSTR_GROUPING, gp);
+	PREVIEW_INSTR_GROUP(INSTR_GROUPING, gp);
 
 	char *raw_str = malloc(strlen(yytext) + 8); // HACK larger buffer to circumvent segfault
 	strcpy(raw_str, yytext);
 	PROC_INSTR(raw_str, GROUPING_PARAM);
+	free(sLOGIC);
+	sLOGIC = NULL;
 }
 void INSTRUCTION_(char *yytext)
 {
@@ -941,6 +1032,8 @@ void INSTRUCTION_(char *yytext)
 	char *raw_str = malloc(strlen(yytext) + 8); // HACK larger buffer to circumvent segfault
 	strcpy(raw_str, yytext);
 	PROC_INSTR(raw_str, SINGLE_REGULAR);
+	free(sLOGIC);
+	sLOGIC = NULL;
 }
 void INSTRUCTION_PARAM(char *yytext)
 {
@@ -950,4 +1043,6 @@ void INSTRUCTION_PARAM(char *yytext)
 	char *raw_str = malloc(strlen(yytext) + 8); // HACK larger buffer to circumvent segfault
 	strcpy(raw_str, yytext);
 	PROC_INSTR(raw_str, SINGLE_PARAM);
+	free(sLOGIC);
+	sLOGIC = NULL;
 }

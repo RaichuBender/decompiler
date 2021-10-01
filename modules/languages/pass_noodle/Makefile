@@ -15,6 +15,8 @@ EXE_PR	:=	../preach_modest_tool
 
 INCLUDE	:= -I. -I../../../include -I../include
 
+CFLAGS	:= -lfl -D_DEBUG -Wno-int-conversion
+
 default:		pass_noodle preach_modest
 
 pass_noodle:		pass_noodle.gen.h
@@ -30,13 +32,13 @@ preach_modest.gen.h:	preach_modest_rules.l
 	flex -o $@ $^
 
 $(EXE_PA):		pass_noodle.o
-	$(CC) -O2 -s $^ -o $@ $(INCLUDE) -lfl -D_SYNTAX -Wno-int-conversion
+	$(CC) -O2 -s $^ -o $@ $(INCLUDE) $(CFLAGS)
 
 $(EXE_PR):		preach_modest.o
-	$(CC) -O2 -s $^ -o $@ $(INCLUDE) -lfl -D_SYNTAX -Wno-int-conversion
+	$(CC) -O2 -s $^ -o $@ $(INCLUDE) $(CFLAGS)
 
 %.o:			%.c
-	$(CC) -O2 -s $^ -o $@ $(INCLUDE) -lfl -D_SYNTAX -Wno-int-conversion -c
+	$(CC) -O2 -s $^ -o $@ $(INCLUDE) $(CFLAGS) -c
 
 .PHONY:clean clean-all
 clean:

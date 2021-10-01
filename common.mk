@@ -45,7 +45,7 @@ ifeq ($(ADD_SUFFIX),TRUE)
 EXE_SFX	:= $(DBG_SUFFIX)
 endif
 
-CFLAGS	:= -O0 -g
+CFLAGS	:= -O0 -g -D_DEBUG
 endif #eq ($(PROFILE),RELEASE)
 
 

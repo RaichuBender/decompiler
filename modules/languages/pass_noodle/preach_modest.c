@@ -11,18 +11,18 @@
 *
 **********************************/
 
-#ifndef _SYNTAX
+#ifndef _DEBUG
 
 #include "preach_modest.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#else // _SYNTAX
+#else // _DEBUG
 
 #include "preach_modest.gen.h"
 
-#endif // _SYNTAX
+#endif // _DEBUG
 
 // Preprocessor output to be written
 char prprc_out[4096 * 4096];

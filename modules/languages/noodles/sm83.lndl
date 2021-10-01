@@ -1,13 +1,13 @@
 #**********************************
 #
-#	 @file      sm83.lmodule
-#	 @author    Thomas Gijsbers (@RaichuBender)
-#	 @brief     SM83 Assembly Language Module
+#	 @file	sm83.lmodule
+#	 @author	Thomas Gijsbers (@RaichuBender)
+#	 @brief	 SM83 Assembly Language Module
 #	 @version   0.1
-#	 @date      2021／09／24
+#	 @date	2021／09／24
 #
 #	 @copyright  © Copyright 2021 — Thomas Gijsbers
-#	           	   All rights reserved.
+#			 	 All rights reserved.
 #
 #		"GAME BOY" and "GAME BOY COLOR” are
 #			trade narks or registered trade
@@ -162,34 +162,40 @@ LANGUAGE(sm83_asm)
 	INSTRUCTION_SET(REGULAR)
 	#: All non-CB instructions
 
-	# Misc
+	## Misc
 		"NOP":		NOTHING	0x00	1 4
 		{
-			NO_OP;
+			"NO_OP;\n"
 		}
 
 		"STOP 0":	SPECIAL	0x10	2 4
 		{
-			NO_OP;	// TODO
+			"STOP(0);\n"
 		}
 
 		"HALT":		SPECIAL	0x76	1 4
 		{
-			NO_OP;	// TODO
+			"HALT;\n"
 		}
 
-	# 8-bit Loads:
+		"<<CB>> 0x%02x", IMM8:	SPECIAL	0xcb	2 8
+		{
+			"// <<CB>> 0x%02x;\n"
+		}
+
+	## Loads
+		# 8-bit Loads
 MACRO:LOAD( _REG_, _OP_B_ )
 =BEGIN
 		"LD _REG_, %s": MOV_STOR	GROUP( _OP_B_, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)", "A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	 *8(HL),   A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				LOAD REG	_REG_, PARAM[0];
+				" _REG_ = %s;\n"
 			}
 		}
 =END
@@ -203,387 +209,548 @@ MACRO:LOAD( _REG_, _OP_B_ )
 
 		"LD (HL), %s": MOV_STOR	GROUP( 0x70, 6, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L	}
 			INSTR_COUNT:	1
 			CYCLES:			8
 
 			{
-				LOAD, REG_ADR(HL) PARAM[0];
+				"(*HL) = %s;\n"
 			}
 		}
 
 		"LD (HL), A": MOV_STOR	0x77	1 8
 		{
-			LOAD, REG_ADR(HL), REG(A);
+			"(*HL) = A;\n"
 		}
 
 		^%LOAD( A, 0x78 )
 
-		"LD %s, 0x%02x", IMM8: MOV_STOR	GROUP( 0x06, 8, 8 )
+		"LD %s, 0x%%02x", IMM8: MOV_STOR	GROUP( 0x06, 8, 8 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	2
-			CYCLES:	{	 4      4      4      4      4      4      12     4    }
+			CYCLES:	{	 8,	8,	8,	8,	8,	8,	12,	8	}
 
 			{
-				LOAD PARAM[0], CONST(IMM8);
+				"%s = 0x%%02x;\n"
 			}
 		}
 
-	# 16-bit Loads:
-		"LD %s, A", IMM8: MOV_STOR	GROUP( 0x06, 4, 16 )
+		"LDH (0xff%02x), A", IMM8: MOV_STOR	0xe0	2 12
 		{
-			REPR:	{	"(BC)"    "(DE)"    "(HL+)"    "(HL-)"   }
-			PARAM:	{	REG_ADR(BC)     REG_ADR(DE)     REG_ADR(HL)   REG_ADR(HL)  }
+			"*(0xff00|0x%02x) = A;\n"
+		}
+		"LDH A, (0xff%02x)", IMM8: MOV_STOR	0xf0	2 12
+		{
+			"A = *(0xff00|0x%02x);\n"
+		}
+
+		"LD %s, A":	MOV_STOR	GROUP( 0x02, 4, 16 )
+		{
+			REPR:	{	"(BC)",	"(DE)",	"(HL+)",	"(HL-)"   }
+			PARAM:	{	*8(BC),	*8(DE),	*8(HL++),	*8(HL--)  }
 			INSTR_COUNT:	1
 			CYCLES:			8
 
 			{
-				LOAD	PARAM[0], REG(A);
+				"%s = A;\n"
+			}
+		}
+		"LD A, %s":	MOV_STOR	GROUP( 0x0a, 4, 16 )
+		{
+			REPR:	{	"(BC)",	"(DE)",	"(HL+)",	"(HL-)"   }
+			PARAM:	{	*8(BC),	*8(DE),	*8(HL++),	*8(HL++)  }
+			INSTR_COUNT:	1
+			CYCLES:			8
+
+			{
+				"A = %s;\n"
 			}
 		}
 
-		"LD (HL+), A":	MOV_STOR	0x26	1 8
+		"LD (C), A": MOV_STOR	0xe2	2 8
 		{
-			LOAD			REG_ADR(HL), REG(A);
-			ARITHMETIC ADD	REG(HL), CONST(1);
+			"*(0xff00|C) = A;\n"
+		}
+		"LD A, (C)": MOV_STOR	0xf2	2 8
+		{
+			"A = *(0xff00|C);\n"
 		}
 
-		"LD (HL-), A":	MOV_STOR	0x36	1 8
+		"LD (0x%04x), A", IMM16: MOV_STOR	0xea	3 16
 		{
-			LOAD			REG_ADR(HL), REG(A);
-			ARITHMETIC SUB	REG(HL), CONST(1);
+			"(*0x%04x) = A;\n"
+		}
+		"LD A, (0x%04x)", IMM16: MOV_STOR	0xfa	3 16
+		{
+			"A = (*0x%04x);\n"
 		}
 
-	# 8-bit Arithmetic:
-		"INC %s": ARITHMETIC	GROUP( 0x04, 8, 8 )
+		# 16-bit Loads
+		"LD %s, 0x%%04x", IMM16:	MOV_STOR	GROUP( 0x01, 4, 16 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
-			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      12     4    }
+			REPR:	{	"BC",	"DE",	"HL",	"SP"   }
+			PARAM:	{	BC,	DE,	HL,	SP  }
+			INSTR_COUNT:	3
+			CYCLES:			12
 
 			{
-				ARITHMETIC ADD	PARAM[0], CONST(1);
+				"%s = 0x%%04x;\n"
+			}
+		}
 
-				LOAD FLAG(ZF), CONDITION(PARAM[0] == 0);
-				LOAD FLAG(NF), CONST(false);
-				LOAD FLAG(HF), CONDITION(PARAM[0].nl > 0xf);
+		"LD (0x%04x), SP", IMM16:	MOV_STOR	0x08	3 20
+		{
+			"(*0x%04x) = SP;\n"
+		}
+
+		"POP %s":	MOV_STOR	GROUP( 0xc1, 4, 16 )
+		{
+			REPR:	{	"BC",	"DE",	"HL",	"AF"   }
+			PARAM:	{	BC,	DE,	HL,	SP  }
+			INSTR_COUNT:	1
+			CYCLES:			12
+
+			{
+				"%1$s = STACK[SP++];\n"
+			}
+		}
+
+		"PUSH %s":	MOV_STOR	GROUP( 0xc5, 4, 16 )
+		{
+			REPR:	{	"BC",	"DE",	"HL",	"AF"   }
+			PARAM:	{	BC,	DE,	HL,	SP  }
+			INSTR_COUNT:	1
+			CYCLES:			16
+
+			{
+				"STACK[--SP] = %1$s;\n"
+			}
+		}
+
+	## Arithmetic
+		# 8-bit Arithmetic
+		"INC %s": ARITHMETIC	GROUP( 0x04, 8, 8 )
+		{
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
+			INSTR_COUNT:	1
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	12,	4	}
+
+			{
+				"--%1$s;\n"
+				"ZF = CF = %1$s == -1;\n"
+				"HF = ((u8)%1$s) == 0xf;\n"
+				"NF = false;\n"
 			}
 		}
 
 		"DEC %s": ARITHMETIC	GROUP( 0x05, 8, 8 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      12     4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	12,	4	}
 
 			{
-				ARITHMETIC SUB	PARAM[0], CONST(1);
-
-				LOAD FLAG(ZF), CONDITION(PARAM[0] == 0);
-				SETFLAG ZF, PARAM[0] == 0;
-				SETFLAG NF, true;
-				SETFLAG HF, PARAM[0].nl > 0xf;
+				"++%1$s;\n"
+				"ZF = %1$s == 1;\n"
+				"CF = %1$s == 0;\n"
+				"HF = ((u8)%1$s) == 0;\n"
+				"NF = true;\n"
 			}
 		}
 
 
 		"ADD A, %s": ARITHMETIC	GROUP( 0x80, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				ARITHMETIC ADD	REG(A), PARAM[0];
-
-				SETFLAG ZF, A == 0;
-				SETFLAG NF, false;
-				SETFLAG HF, A.nl > 0xf;
-				SETFLAG CF, A > 0xff;
+				"A += %1$s;\n"
+				"ZF = A == (0 - %1$s);\n"
+				"CF = (A + %1$s) < A;\n"
+				"HF = (A + %1$s):4[0] < ((u8)A);\n"
+				"NF = false;\n"
 			}
 		}
 
 		"ADD A, 0x%02x", IMM8: ARITHMETIC	0xc6	2 8
 		{
-			ARITHMETIC ADD	REG(A), CONST(IMM8);
-
-			SETFLAG ZF, A == 0;
-			SETFLAG NF, false;
-			SETFLAG HF, A.nl > 0xf;
-			SETFLAG CF, A > 0xff;
+			"A += 0x%1$02x;\n"
+			"ZF = A == (0 - 0x%1$02x);\n"
+			"CF = (A + 0x%1$02x) < A;\n"
+			"HF = (A + 0x%1$02x):4[0] < ((u8)A);\n"
+			"NF = false;\n"
 		}
 
 
 		"ADC A, %s": ARITHMETIC	GROUP( 0x88, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				ARITHMETIC ADD	REG(A), FLAG(CF);
-				ARITHMETIC ADD	REG(A), PARAM[0];
-
-				SETFLAG ZF, A == 0;
-				SETFLAG NF, false;
-				SETFLAG HF, A.nl > 0xf;
-				SETFLAG CF, A > 0xff;
+				"if (CF)\n"
+				"	A += %1$s + 1;\n"
+				"else\n"
+				"	A += %1$s;\n"
+				"ZF = A == (0 - %1$s);\n"
+				"CF = (A + %1$s) < A;\n"
+				"HF = (A + %1$s):4[0] < ((u8)A);\n"
+				"NF = false;\n"
 			}
 		}
 
 		"ADC A, 0x%02x", IMM8: ARITHMETIC	0xce	2 8
 		{
-			ARITHMETIC ADD	REG(A), FLAG(CF);
-			ARITHMETIC ADD	REG(A), CONST(IMM8);
-
-			SETFLAG ZF, A == 0;
-			SETFLAG NF, false;
-			SETFLAG HF, A.nl > 0xf;
-			SETFLAG CF, A > 0xff;
+			"if (CF)\n"
+			"	A += 0x%1$02x + 1;\n"
+			"else\n"
+			"	A += 0x%1$02x;\n"
+			"ZF = A == (0 - 0x%1$02x);\n"
+			"CF = (A + 0x%1$02x) < A;\n"
+			"HF = ((u8)(A + 0x%1$02x)) < ((u8)A);\n"
+			"NF = false;\n"
 		}
 
 
 		"SUB %s": ARITHMETIC	GROUP( 0x90, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				ARITHMETIC SUB	REG(A), PARAM;
-
-				SETFLAG ZF, A == 0;
-				SETFLAG NF, true;
-				SETFLAG HF, A.nl > 0xf;
-				SETFLAG CF, A > 0xff;
+				"A -= %1$s;\n"
+				"ZF = A == %1$s;\n"
+				"CF = A < %1$s;\n"
+				"HF = ((u8)A) < ((u8)%1$s);\n"
+				"NF = true;\n"
 			}
 		}
 
 		"SUB A, 0x%02x", IMM8: ARITHMETIC	0xd6	2 8
 		{
-			ARITHMETIC SUB	REG(A), CONST(IMM8);
-
-			SETFLAG ZF, A == 0;
-			SETFLAG NF, true;
-			SETFLAG HF, A.nl > 0xf;
-			SETFLAG CF, A > 0xff;
+			"A -= 0x%1$02x;\n"
+			"ZF = A == 0x%1$02x;\n"
+			"CF = A < 0x%1$02x;\n"
+			"HF = ((u8)A) < ((u8)0x%1$02x);\n"
+			"NF = true;\n"
 		}
 
 
 		"SBC A, %s": ARITHMETIC	GROUP( 0x98, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				REG_SUB	A, PARAM[0] + CF;
-
-				SETFLAG ZF, A == 0;
-				SETFLAG NF, true;
-				SETFLAG HF, A.nl > 0xf;
-				SETFLAG CF, A > 0xff;
+				"if (CF)\n"
+				"	A -= (%1$s + 1);\n"
+				"else\n"
+				"	A -= %1$s;\n"
+				"ZF = A == %1$s;\n"
+				"CF = A < %1$s;\n"
+				"HF = ((u8)A) < ((u8)%1$s);\n"
+				"NF = true;\n"
 			}
 		}
 
 		"SBC A, 0x%02x", IMM8: ARITHMETIC	0xde	2 8
 		{
-			REG_SUB	A, IMM8 + CF;
-
-			SETFLAG ZF, A == 0;
-			SETFLAG NF, true;
-			SETFLAG HF, A.nl > 0xf;
-			SETFLAG CF, A > 0xff;
+			"if (CF)\n"
+			"	A -= (0x%1$02x + 1);\n"
+			"else\n"
+			"	A -= 0x%1$02x;\n"
+			"ZF = A == 0x%1$02x;\n"
+			"CF = A < 0x%1$02x;\n"
+			"HF = ((u8)A) < ((u8)0x%1$02x);\n"
+			"NF = true;\n"
 		}
-
 
 		"AND %s": ARITHMETIC	GROUP( 0xa0, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				ARITHMETIC ADD	REG(A), PARAM[0];
+				"A &= %1$s;\n"
+				"ZF = (A & %1$s) == 0;\n"
+				"CF = false;\n"
+				"HF = true;\n"
+				"NF = false;\n"
 			}
 		}
 
 		"AND 0x%02x", IMM8: ARITHMETIC	0xe6	2 8
 		{
-			ARITHMETIC ADD	REG(A), PARAM[0];
+			"A &= 0x%1$02x;\n"
+			"ZF = (A & 0x%1$02x) == 0;\n"
+			"CF = false;\n"
+			"HF = true;\n"
+			"NF = false;\n"
 		}
 
 
 		"XOR %s": ARITHMETIC	GROUP( 0xa8, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				ARITHMETIC ADD	REG(A), PARAM[0];
+				"A ^= %1$s;\n"
+				"ZF = (A ^ %1$s) == 0;\n"
+				"CF = false;\n"
+				"HF = false;\n"
+				"NF = false;\n"
 			}
 		}
 
 		"XOR 0x%02x", IMM8: ARITHMETIC	0xee	2 8
 		{
-			ARITHMETIC ADD	REG(A), PARAM[0];
+			"A ^= 0x%1$02x;\n"
+			"ZF = (A ^ 0x%1$02x) == 0;\n"
+			"CF = false;\n"
+			"HF = false;\n"
+			"NF = false;\n"
 		}
 
 
 		"OR %s": ARITHMETIC	GROUP( 0xb0, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				ARITHMETIC ADD	REG(A), PARAM[0];
+				"A |= %1$s;\n"
+				"ZF = (A | %1$s) == 0;\n"
+				"CF = false;\n"
+				"HF = false;\n"
+				"NF = false;\n"
 			}
 		}
 
 		"OR 0x%02x", IMM8: ARITHMETIC	0xf6	2 8
 		{
-			ARITHMETIC ADD	REG(A), PARAM[0];
+		OPT REPR:
+			"A |= 0x%1$02x;\n"
+			"ZF = (A | 0x%1$02x) == 0;\n"
+			"CF = false;\n"
+			"HF = false;\n"
+			"NF = false;\n"
 		}
 
 
 		"CP A, %s": ARITHMETIC	GROUP( 0xb8, 8, 1 )
 		{
-			REPR:	{	"B"    "C"    "D"    "E"    "H"    "L"    "(HL)" "A"   }
-			PARAM:	{	 REG(B)      REG(C)      REG(D)      REG(E)      REG(H)      REG(L)     REG_ADR(HL)   REG(A)    }
+			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
+			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
 			INSTR_COUNT:	1
-			CYCLES:	{	 4      4      4      4      4      4      8      4    }
+			CYCLES:	{	 4,	4,	4,	4,	4,	4,	8,	4	}
 
 			{
-				local a = A;
-				REG_SUB	A, PARAM[0];
-
-				SETFLAG ZF, A == 0;
-				SETFLAG NF, true;
-				SETFLAG HF, A.nl > 0xf;
-				SETFLAG CF, A > 0xff;
-
-				A = a;
+				"ZF = A == %1$s;\n"
+				"CF = A < %1$s;\n"
+				"HF = ((u8)A) < ((u8)%1$s);\n"
+				"NF = true;\n"
 			}
 		}
 
 		"CP 0x%02x", IMM8: ARITHMETIC	0xfe	2 8
 		{
-			local a = A;
-			REG_SUB	A, IMM8;
+			"ZF = A == 0x%1$02x;\n"
+			"CF = A < 0x%1$02x;\n"
+			"HF = ((u8)A) < ((u8)0x%1$02x);\n"
+			"NF = true;\n"
+		}
 
-			SETFLAG ZF, A == 0;
-			SETFLAG NF, true;
-			SETFLAG HF, A.nl > 0xf;
-			SETFLAG CF, A > 0xff;
+		# TODO These require additional logic
+		"DAA": ARITHMETIC	0x27	1 4
+		{
+			"DAA;\n"
+		}
+		"CPL": ARITHMETIC	0x2f	1 4
+		{
+			"CPL;\n"
+		}
+		"SCF": ARITHMETIC	0x37	1 4
+		{
+			"SCF;\n"
+		}
+		"CCF": ARITHMETIC	0x3f	1 4
+		{
+			"CCF;\n"
+		}
 
-			A = a;
+		# 16-bit Arithmetic
+		"INC %s": ARITHMETIC	GROUP( 0x03, 4, 16 )
+		{
+			REPR:	{	"BC",	"DE",	"HL",	"SP"	}
+			PARAM:	{	HL,	DE,	HL,	SP	}
+			INSTR_COUNT:	1
+			CYCLES:			8
+
+			{
+				"++%s;\n"
+			}
+		}
+		"DEC %s": ARITHMETIC	GROUP( 0x0b, 4, 16 )
+		{
+			REPR:	{	"BC",	"DE",	"HL",	"SP"	}
+			PARAM:	{	BC,	DE,	HL,	SP	}
+			INSTR_COUNT:	1
+			CYCLES:			8
+
+			{
+				"--%s;\n"
+			}
+		}
+
+		"ADD HL, %s": ARITHMETIC	GROUP( 0x09, 4, 16 )
+		{
+			REPR:	{	"BC",	"DE",	"HL",	"SP"	}
+			PARAM:	{	HL,	DE,	HL,	SP	}
+			INSTR_COUNT:	1
+			CYCLES:			8
+
+			{
+				"HL += %1"RETI": RETURN	0xd9	1 16
+				1	_LOGIC
+				2	_LOGIC
+				$s;\n"
+				"CF = (HL + %1$s) < HL;\n"
+				"HF = ((u8)(HL + %1$s)) < ((u8)HL);\n"
+				"NF = false;\n"
+			}
+		}
+
+	## Bit manipulation
+		# Rotate A
+		"R%s":	BIT_MANIP	GROUP( 0x07, 4, 8 )
+		{
+			REPR:	{	"LCA",	"RCA",	"LA",	"RA"	}
+			PARAM:	0
+			INSTR_COUNT:	1
+			CYCLES:	4
+
+			{
+				"R%s;\n"
+			}
 		}
 
 	##	Branching
-	# Unconditional jumps
+		# Unconditional jumps
 		"JP 0x%04x", IMM16: JUMP	0xc3	3 16
 		{
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+			"goto lbl_%04x;\n"
 		}
 
 		"JR 0x%04x", IMM8_R: JUMP	0x18	2 12
 		{
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+			"goto lbl_%04x;\n"
 		}
 
-	# Conditional jumps
-		"JP NZ,%04x", IMM16: JUMP	0xc2	3 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		# Conditional jumps
+		"JP %s, 0x%%04x", IMM16: JUMP	GROUP(  0xc2, 4, 8  )
+		{
+			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
+			PARAM:	{	ZF==0,	ZF==1,	CF==0,	CF==1	}
+			INSTR_COUNT:	3
+			CYCLES:	12
+
+			{
+				"if (%s)\n"
+				"	goto lbl_%%04x;\n"
+			}
 		}
 
-		"JP Z,%04x", IMM16: JUMP	0xca	3 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		"JR %s, 0x%%04x", IMM8_R: JUMP	GROUP(  0x20, 4, 8  )
+		{
+			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
+			PARAM:	{	ZF==0,	ZF==1,	CF==0,	CF==1	}
+			INSTR_COUNT:	3
+			CYCLES:	12
+
+			{
+				"if (%s)\n"
+				"	goto lbl_%%04x;\n"
 		}
 
-		"JP NC,%04x", IMM16: JUMP	0xd2	3 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		# Reset vector jumps
+		"RST %s": JUMP	GROUP(  0xc7, 8, 8  )
+		{
+			REPR:	{    "0x0000",	"0x0008",	"0x0010",	"0x0018",	"0x0020",	"0x0028",	"0x0030",	"0x0038"    }
+			PARAM:	{	0,	8,	0x10,	0x18,	0x20,	0x28,	0x30,	0x38	}
+			INSTR_COUNT:	1
+			CYCLES:	16
+
+			{
+				"RST%s();\n"
+				"return;\n"
+			}
 		}
 
-		"JP C,%04x", IMM16: JUMP	0xda	3 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
-		}
-
-
+		# Unconditional calls
 		"CALL 0x%04x", IMM16: CALL	0xcd	3 24
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		{
+			"fn_%04x();\n"
 		}
 
+		# Conditional calls
+		"CALL %s, 0x%%04x", IMM16: CALL	GROUP(  0xc4, 4, 8  )
+		{
+			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
+			PARAM:	0
+			INSTR_COUNT:	3
+			CYCLES:	12
 
-		"CALL NZ,%04x", IMM16: CALL	0xc4	3 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+			{
+				"if (%s)\n"
+				"	fn_%%04x();\n"
+			}
 		}
 
-		"CALL Z,%04x", IMM16: CALL	0xcc	3 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
-		}
-
-		"CALL NC,%04x", IMM16: CALL	0xd4	3 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
-		}
-
-		"CALL C,%04x", IMM16: CALL	0xdc	3 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
-		}
-
-
-
+		# Unconditional returns
 		"RET": RETURN	0xc9	1 16
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		{
+			"return;\n"
 		}
 
 		"RETI": RETURN	0xd9	1 16
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+		{
+			"IE;\n"
+			"return;\n"
 		}
 
+		# Conditional returns
+		"RET %s": RETURN	GROUP(  0xc0, 4, 8  )
+		{
+			REPR:	{	"NZ",	"Z",	"NC",	"C"	}
+			PARAM:	0
+			INSTR_COUNT:	1
+			CYCLES:	12
 
-		"RET NZ": RETURN	0xc0	1 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
-		}
-
-		"RET Z": RETURN	0xc8	1 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
-		}
-
-		"RET NC": RETURN	0xd0	1 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
-		}
-
-		"RET C": RETURN	0xd8	1 12
-		{	#				 TODO conditional ^^ 12/16
-			BRANCH UNCONDITIONAL	REG(PC)	IMM16;
+			{
+				"if (%s)\n"
+				"	return;\n"
+			}
 		}
 
 	END_INSTRUCTION_SET
