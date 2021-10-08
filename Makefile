@@ -12,55 +12,42 @@
 #**********************************
 include common.mk
 
-# EXE	:=	bin/main
-EXE_BASE	:=	main
-EXE	:= $(EXE_BASE)$(EXE_SFX)
+BINDIR	:=	bin/
+OBJDIR	:=	obj/
+EXE_BASE:=	main
+EXE	:= $(BINDIR)$(EXE_BASE)$(EXE_SFX)
 
-LIB	:=	-Llib
-OUT	:=	bin obj
+include objects.mk
 
-SOURCES	:=	$(wildcard src/*.c)
-OBJECTS	:=	$(patsubst src/%,obj/%,$(SOURCES))
-OBJECTS	:=	$(OBJECTS:%.c=%.o)
+ifeq ($(STATIC_LINK),TRUE)
+OBJECTS	+=	$(LANG_OBJECTS)
+else
+LIB	:=	-Llib -llanguages
+endif
 
-LANG_SOURCES :=	$(wildcard modules/languages/src/*.c)
-LANG_OBJECTS :=	$(patsubst modules/languages/src/%,modules/languages/obj/%,$(LANG_SOURCES))
-LANG_OBJECTS :=	$(LANG_OBJECTS:%.c=%.o)
-
+OUT	:=	$(BINDIR) $(OBJDIR)
 
 default:	$(OUT)
 	@$(MAKE) -C modules/languages
 	@$(MAKE) $(EXE)
 
-.PHONY:		all pkg clean clean-all
+.PHONY:		all dbg pkg all-pkg clean clean-all r rs pkg r-pkg rs-pkg deploy build install uninstall
 
-#	Moreso for testing and deployment
-# This will make all targets, including
-# debug and stripped/static versions.
-# This could be quite wasteful in the
-# future, so be mindful of what you do
-all:
+include todo.mk
 
-	@$(MAKE) default	-E'override PROFILE:=DEBUG'	-E'override STATIC_LINK:=FALSE'	-E'override ADD_SUFFIX:=TRUE'
-	@$(MAKE) clean		-E'override PROFILE:=DEBUG'	-E'override STATIC_LINK:=FALSE'	-E'override ADD_SUFFIX:=TRUE'
+install:
+	-rm -r /usr/bin/decompiler /usr/lib/liblanguages.so /usr/share/decompiler
+	cp bin/main /usr/bin/decompiler
+	ln -s lib/liblanguages.so /usr/lib/liblanguages.so
+	mkdir /usr/share/decompiler
+	cp .pokeyellow.gbc /usr/share/decompiler
 
-	@$(MAKE) default	-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=FALSE'	-E'override ADD_SUFFIX:=TRUE'
-	@$(MAKE) clean		-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=FALSE'	-E'override ADD_SUFFIX:=TRUE'
+uninstall:
+	-rm -r /usr/bin/decompiler /usr/lib/liblanguages.so /usr/share/decompiler
 
-	@$(MAKE) default	-E'override PROFILE:=DEBUG'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
-	@$(MAKE) clean		-E'override PROFILE:=DEBUG'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
-
-	@$(MAKE) default	-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
-	@$(MAKE) clean		-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
-
-r:
-	@$(MAKE) default	-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=FALSE'	-E'override ADD_SUFFIX:=TRUE'
-rs:
-	@$(MAKE) default	-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
-
-
-$(EXE):		$(OBJECTS) $(LANG_OBJECTS)
+$(EXE):		$(OBJECTS)
 	$(CC) -o $@	$^ $(CFLAGS) $(INCLUDE) $(LIB)
+	-ln -s bin/main main
 
 obj/%.o:	src/%.c
 	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(LIB)
@@ -69,14 +56,14 @@ $(OUT):
 	@-mkdir $@
 
 
-PKG			:= build
+PKG			= build
 $(PKG):
 	-mkdir $@
 
 pkg:		$(PKG)
-	-mkdir -p $</bin
+#	-mkdir -p $</bin
 	mv $(EXE) $</$(EXE)
-	cp .pokeyellow.gbc $</.pokeyellow.gbc # TODO placeholder
+	cp .pokeyellow.gbc $(PKG)/.pokeyellow.gbc # TODO placeholder
 	@$(MAKE) clean
 
 clean:

@@ -49,11 +49,17 @@ typedef struct _LANGUAGE
 	REGISTER_STORAGE *reg_spaces;
 } LANGUAGE;
 
-typedef struct _INSTRUCTION_SET
+typedef struct _MODULE_INSTRUCTION_SET
+{
+	const char *name;
+	MDL_INSTRUCTION instructions[256];
+} MODULE_INSTRUCTION_SET;
+
+typedef struct _RUNTIME_INSTRUCTION_SET
 {
 	const char *name;
 	INSTRUCTION instructions[256];
-} INSTRUCTION_SET;
+} RUNTIME_INSTRUCTION_SET;
 
 typedef struct _INSTR_BLOCK
 {

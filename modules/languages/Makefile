@@ -18,7 +18,7 @@ INCLUDE	+=	-Iinclude
 LIB	:=
 OUT	:=	obj tmp
 
-OUTPUT	:=	../../lib/languages.so
+OUTPUT	:=	../../lib/liblanguages.so
 
 SOURCES	:=	$(wildcard src/*.c)
 OBJECTS	:=	$(patsubst src/%,obj/%,$(SOURCES))

@@ -631,10 +631,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			CYCLES:			8
 
 			{
-				"HL += %1"RETI": RETURN	0xd9	1 16
-				1	_LOGIC
-				2	_LOGIC
-				$s;\n"
+				"HL += %1$s;\n"
 				"CF = (HL + %1$s) < HL;\n"
 				"HF = ((u8)(HL + %1$s)) < ((u8)HL);\n"
 				"NF = false;\n"

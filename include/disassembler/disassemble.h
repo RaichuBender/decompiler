@@ -13,6 +13,7 @@
 #ifndef __DISASSEMBLE_H__
 #define __DISASSEMBLE_H__
 
+#if 0
 #include "instructions.h"
 #include "typedefs.h"
 
@@ -27,8 +28,23 @@ typedef struct
 	POINTER adr;
 } OFFSET;
 
-int disassemble_block(INSTRUCTION ***pppINSTR, BYTE *MEM, u32 loc, size_t size);
-INSTRUCTION *disassemble_single(BYTE *MEM, u32 loc);
-INSTRUCTION *decode_opcode(BYTE *raw_bytes);
+int disassemble_block(MDL_INSTRUCTION ***pppINSTR, BYTE *MEM, u32 loc, size_t size);
+MDL_INSTRUCTION *disassemble_single(BYTE *MEM, u32 loc);
+MDL_INSTRUCTION *decode_opcode(BYTE *raw_bytes);
+#endif
+
+#include "sys/common.h"
+#include "language.h"
+
+extern BYTE *MEM;
+
+extern u16						dadr;
+extern size_t					file_sz;
+extern int						byte_ptr;
+extern char *					source_mnemonic;
+extern char *					formatted_mnemonic;
+extern RUNTIME_INSTRUCTION_SET *rtinsst;
+
+void disassemble(void);
 
 #endif // __DISASSEMBLE_H__

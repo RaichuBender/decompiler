@@ -69,13 +69,25 @@ typedef enum _OPERATION
 // 	u32		  operand2;
 // } LOGIC;
 
+typedef struct _MDL_INSTRUCTION
+{
+	char *			 mnemonic;
+	u8				 opcode;
+	OPERATION        operation;
+	u32				 operand_count;
+	u32				 cycles;
+	int				 imm;
+	char *			 logic;
+// INSTRUCTION_ATTR attributes;
+// u32				 logic_count;
+// LOGIC *			 logic;
+} MDL_INSTRUCTION;
+
 typedef struct _INSTRUCTION
 {
-	char *			 mnemonic;	/*
-#ifdef _UNINDEXED	*/
+	char *			 mnemonic;
 	u8				 opcode;
-	OPERATION        operation;	/* // TODO use struct LOGIC
-#endif // _UNINDEXED	*/
+	OPERATION        operation;
 //	u64				 addr;
 	u32				 operand_count;
 	u32				 cycles;
@@ -85,5 +97,4 @@ typedef struct _INSTRUCTION
 // u32				 logic_count;
 // LOGIC *			 logic;
 } INSTRUCTION;
-
 #endif //__INSTRUCTIONS_H__

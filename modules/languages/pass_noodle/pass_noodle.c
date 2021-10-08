@@ -464,7 +464,7 @@ void INSTRSET(char *yytext)
 	scope_name[token_scope] = malloc(32);
 	sprintf(scope_name[token_scope], "%s", name);
 
-	ADD_TXT("INSTRUCTION_SET %s =\n{\n", name);
+	ADD_TXT("MODULE_INSTRUCTION_SET %s =\n{\n", name);
 
 	INDENT(token_scope);
 	ADD_TXT("/*Name:    */ \"%s\",\n", name);
