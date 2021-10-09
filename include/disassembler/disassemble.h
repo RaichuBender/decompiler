@@ -44,7 +44,9 @@ extern int						byte_ptr;
 extern char *					source_mnemonic;
 extern char *					formatted_mnemonic;
 extern RUNTIME_INSTRUCTION_SET *rtinsst;
+extern BOOL						bTermCol;
 
 void disassemble(void);
+void decompile(void);
 
 #endif // __DISASSEMBLE_H__

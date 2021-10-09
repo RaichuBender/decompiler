@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Decompiler
+Type=Application
+Exec=/usr/bin/decompiler
+Terminal=false
+GenericName=Raichu's decompiler

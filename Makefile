@@ -22,8 +22,10 @@ include objects.mk
 ifeq ($(STATIC_LINK),TRUE)
 OBJECTS	+=	$(LANG_OBJECTS)
 else
-LIB	:=	-Llib -llanguages
+LIB	:=	-Llib -llanguages $(shell pkg-config --libs gtk+-3.0) -rdynamic
 endif
+
+OBJECTS	+=	$(UI_OBJECTS)
 
 OUT	:=	$(BINDIR) $(OBJDIR)
 
@@ -36,14 +38,16 @@ default:	$(OUT)
 include todo.mk
 
 install:
-	-rm -r /usr/bin/decompiler /usr/lib/liblanguages.so /usr/share/decompiler
+	-rm -r /usr/bin/decompiler /usr/lib/liblanguages.so /usr/share/decompiler ~/.local/share/applications/decompiler.desktop
 	cp bin/main /usr/bin/decompiler
-	ln -s lib/liblanguages.so /usr/lib/liblanguages.so
+	ln -s `pwd`/lib/liblanguages.so /usr/lib/liblanguages.so
 	mkdir /usr/share/decompiler
 	cp .pokeyellow.gbc /usr/share/decompiler
+	cp ui.glade /usr/share/decompiler
+	cp decompiler.desktop ~/.local/share/applications
 
 uninstall:
-	-rm -r /usr/bin/decompiler /usr/lib/liblanguages.so /usr/share/decompiler
+	-rm -r /usr/bin/decompiler /usr/lib/liblanguages.so /usr/share/decompiler ~/.local/share/applications/decompiler.desktop
 
 $(EXE):		$(OBJECTS)
 	$(CC) -o $@	$^ $(CFLAGS) $(INCLUDE) $(LIB)
@@ -51,6 +55,10 @@ $(EXE):		$(OBJECTS)
 
 obj/%.o:	src/%.c
 	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(LIB)
+
+obj/%.o:	src/ui/%.c
+	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(shell pkg-config --cflags gtk+-3.0) $(LIB)
+
 
 $(OUT):
 	@-mkdir $@

@@ -27,6 +27,8 @@ BYTE *MEM;
 
 RUNTIME_INSTRUCTION_SET *load_module(MODULE_INSTRUCTION_SET *insset);
 
+void ui_entry(int argc, const char *argv[]);
+
 static inline FILE * open_binary(void);
 static inline size_t get_file_size(FILE *fp);
 
@@ -83,7 +85,9 @@ int main(int argc, const char *argv[])
 	formatted_mnemonic = malloc(256);
 
 	rtinsst = load_module(&REGULAR);
-	cmdline_main();
+
+	ui_entry(argc, argv);
+	// cmdline_main();
 
 	return 0;
 }

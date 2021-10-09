@@ -665,7 +665,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 		# Conditional jumps
-		"JP %s, 0x%%04x", IMM16: JUMP	GROUP(  0xc2, 4, 8  )
+		"JP %s, 0x%%04x", IMM16: COND_JUMP	GROUP(  0xc2, 4, 8  )
 		{
 			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
 			PARAM:	{	ZF==0,	ZF==1,	CF==0,	CF==1	}
@@ -678,7 +678,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"JR %s, 0x%%04x", IMM8_R: JUMP	GROUP(  0x20, 4, 8  )
+		"JR %s, 0x%%04x", IMM8_R: COND_JUMP	GROUP(  0x20, 4, 8  )
 		{
 			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
 			PARAM:	{	ZF==0,	ZF==1,	CF==0,	CF==1	}
@@ -711,7 +711,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 		# Conditional calls
-		"CALL %s, 0x%%04x", IMM16: CALL	GROUP(  0xc4, 4, 8  )
+		"CALL %s, 0x%%04x", IMM16: COND_CALL	GROUP(  0xc4, 4, 8  )
 		{
 			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
 			PARAM:	0
@@ -737,7 +737,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 		# Conditional returns
-		"RET %s": RETURN	GROUP(  0xc0, 4, 8  )
+		"RET %s": COND_RETURN	GROUP(  0xc0, 4, 8  )
 		{
 			REPR:	{	"NZ",	"Z",	"NC",	"C"	}
 			PARAM:	0

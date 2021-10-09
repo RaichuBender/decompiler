@@ -154,6 +154,7 @@ MDL_INSTRUCTION *decode_opcode(BYTE *raw_bytes)
 
 static const char OPERATION_COLOR[10][20] =
 {
+#if 1
 	/* INVALID    */ C_RED,
 	/* NOTHING    */ CB_BLACK,
 	/* SPECIAL    */ CB_BLUE,
@@ -164,21 +165,44 @@ static const char OPERATION_COLOR[10][20] =
 	/* CALL       */ CB_YELLOW,
 	/* RETURN     */ CB_RED,
 	/* END        */ NULL,		// TODO
+#else
+	"", "", "", "",
+	"", "", "", "",
+	"", "",
+#endif
 };
 
-#define MNEMONIC_FMT_VALID	 C_MAGENTA "%02x" C_WHITE ":" CB_BLUE "%04x\t\t" F_RESET "%s\n" F_RESET
-#define MNEMONIC_FMT_INVALID C_RED "%02x:%04x" C_RED "\t\t0x%02x\t< ¡¡¡ invalid !!! >\n" F_RESET
+#define MNEMONIC_FMT_VALID	   bTermCol ? MNEMONIC_FMT_VALID_C : MNEMONIC_FMT_VALID_G
+#define MNEMONIC_FMT_INVALID   bTermCol ? MNEMONIC_FMT_INVALID_C : MNEMONIC_FMT_INVALID_G
+#define MNM_ONE				   bTermCol ? MNM_ONE_C : MNM_ONE_G
+#define MNM_TWO				   bTermCol ? MNM_TWO_C : MNM_TWO_G
+#define MNM_THREE			   bTermCol ? MNM_THREE_C : MNM_THREE_G
+
+#define MNEMONIC_FMT_VALID_C   C_MAGENTA "%02x" C_WHITE ":" CB_BLUE "%04x\t\t" F_RESET "%s\n" F_RESET
+#define MNEMONIC_FMT_INVALID_C C_RED "%02x:%04x" C_RED "\t\t0x%02x\t< ¡¡¡ invalid !!! >\n" F_RESET
+
+#define MNEMONIC_FMT_VALID_G   "%02x:%04x\t\t%s\n"
+#define MNEMONIC_FMT_INVALID_G "%02x:%04x\t\t0x%02x\t< ¡¡¡ invalid !!! >\n"
+
+#define MNM_ONE_C			   "%s%s" F_RESET
+#define MNM_TWO_C			   "%s%s\t" C_GREEN "%s" F_RESET
+#define MNM_THREE_C			   "%s%s\t" C_CYAN "%s" F_RESET "%c" C_GREEN "%s" F_RESET
+
+#define MNM_ONE_G			   "%s%s"
+#define MNM_TWO_G			   "%s%s\t%s"
+#define MNM_THREE_G			   "%s%s\t%s%c%s"
 
 static inline BOOL	 check_valid(u8 addr2, u16 addr4);
 static inline void	 format_instruction(u8 addr2, u16 addr4);
 static inline void	 print_formatted(u8 addr2, u16 addr4);
 
-u16						dadr;
-size_t					file_sz;
-int						byte_ptr;
-char *					source_mnemonic;
-char *					formatted_mnemonic;
+u16						 dadr;
+size_t					 file_sz;
+int						 byte_ptr;
+char *					 source_mnemonic;
+char *					 formatted_mnemonic;
 RUNTIME_INSTRUCTION_SET *rtinsst;
+BOOL					 bTermCol = TRUE;
 
 /**********************************
 *
@@ -195,8 +219,8 @@ static inline BOOL check_valid(u8 addr2, u16 addr4)
 	if ((rtinsst->instructions[MEM[byte_ptr]].opcode == -1) || (rtinsst->instructions[MEM[byte_ptr]].mnemonic == NULL))
 	{
 		printf(MNEMONIC_FMT_INVALID,
-			   addr2, addr4,
-			   MEM[byte_ptr]);
+				addr2, addr4,
+				MEM[byte_ptr]);
 
 		return FALSE;
 	}
@@ -243,22 +267,22 @@ static inline void format_instruction(u8 addr2, u16 addr4)
 			delmtr = ' ';
 		}
 		if (third == NULL)
-			sprintf(formatted_mnemonic, "%s%s\t" C_GREEN "%s" F_RESET,
+			sprintf(formatted_mnemonic, MNM_TWO,
 					OPERATION_COLOR[rtinsst->instructions[MEM[byte_ptr]].operation],
 					first, second);
 		else
 		{
 			*(third++) = '\0';
-			sprintf(formatted_mnemonic, "%s%s\t" C_CYAN "%s" F_RESET "%c" C_GREEN "%s" F_RESET ,
+			sprintf(formatted_mnemonic, MNM_THREE,
 					OPERATION_COLOR[rtinsst->instructions[MEM[byte_ptr]].operation],
 					first, second, delmtr, third);
 		}
 	}	// if (second != NULL)
 	else
 		// strcpy(formatted_mnemonic, source_mnemonic);
-			sprintf(formatted_mnemonic, "%s%s"  F_RESET,
-					OPERATION_COLOR[rtinsst->instructions[MEM[byte_ptr]].operation],
-					first);
+		sprintf(formatted_mnemonic, MNM_ONE,
+				OPERATION_COLOR[rtinsst->instructions[MEM[byte_ptr]].operation],
+				first);
 
 	switch (rtinsst->instructions[MEM[byte_ptr]].imm)
 	{
@@ -306,7 +330,7 @@ void disassemble(void)
 		u8  addr2 = (byte_ptr >> 14) & 0xff;
 		u16 addr4 = ((byte_ptr >= 0x4000) << 14)  |  (byte_ptr  & 0x3fff);
 
-		if (!check_valid(addr2, addr4))	 return 0;
+		if (!check_valid(addr2, addr4))	 continue;
 		strcpy(source_mnemonic, rtinsst->instructions[MEM[byte_ptr]].mnemonic);
 		format_instruction(addr2, addr4);
 		print_formatted(addr2, addr4);
@@ -314,6 +338,8 @@ void disassemble(void)
 SKIP_PRINT:
 		ASSERT(rtinsst->instructions[MEM[byte_ptr]].operand_count != 0);
 		byte_ptr += (rtinsst->instructions[MEM[byte_ptr]].operand_count - 1);
+
+		if (rtinsst->instructions[MEM[byte_ptr]].operation == RETURN)	 return;
 	}
 	// while (++byte_ptr < file_sz)
 }
