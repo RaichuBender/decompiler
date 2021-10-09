@@ -29,8 +29,10 @@ OBJECTS	+=	$(UI_OBJECTS)
 
 OUT	:=	$(BINDIR) $(OBJDIR)
 
-default:	$(OUT)
+default:	dbg
+d:	$(OUT)
 	@$(MAKE) -C modules/languages
+	@$(MAKE) include/ui.h.gch
 	@$(MAKE) $(EXE)
 
 .PHONY:		all dbg pkg all-pkg clean clean-all r rs pkg r-pkg rs-pkg deploy build install uninstall
@@ -43,7 +45,7 @@ install:
 	ln -s `pwd`/lib/liblanguages.so /usr/lib/liblanguages.so
 	mkdir /usr/share/decompiler
 	cp .pokeyellow.gbc /usr/share/decompiler
-	cp ui.glade /usr/share/decompiler
+	cp share/ui.glade /usr/share/decompiler
 	cp decompiler.desktop ~/.local/share/applications
 
 uninstall:
@@ -55,6 +57,9 @@ $(EXE):		$(OBJECTS)
 
 obj/%.o:	src/%.c
 	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(LIB)
+
+include/ui.h.gch:	 include/ui.h
+	$(CC) $< $(CFLAGS) $(INCLUDE) $(shell pkg-config --cflags gtk+-3.0) -rdynamic
 
 obj/%.o:	src/ui/%.c
 	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(shell pkg-config --cflags gtk+-3.0) $(LIB)
@@ -75,10 +80,10 @@ pkg:		$(PKG)
 	@$(MAKE) clean
 
 clean:
-	@-rm -rf $(OUT)
+	-rm -rvf $(OUT)
 #	@$(MAKE) -C modules/languages clean
 	@$(MAKE) -C modules/languages clean-all
 
 clean-all:
-	@-rm -rf $(EXE_BASE)* $(OUT) $(PKG)
+	-rm -rvf $(EXE_BASE)* $(OUT) $(PKG) #include/*.h.gch
 	@$(MAKE) -C modules/languages clean-all

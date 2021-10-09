@@ -33,7 +33,7 @@ rs-pkg:	rs
 	@$(MAKE) pkg	-E'override PROFILE:=RELEASE'	-E'override STATIC_LINK:=TRUE'	-E'override ADD_SUFFIX:=TRUE'
 
 dbg:
-	@$(MAKE) -E'override PROFILE:=DEBUG' -E'override STATIC_LINK:=FALSE'
+	@$(MAKE) d -E'override PROFILE:=DEBUG' -E'override STATIC_LINK:=FALSE'
 
 deploy:
 	$(MAKE) rs-pkg -E'override PKG:=release' -E'override EXE:=decompiler'

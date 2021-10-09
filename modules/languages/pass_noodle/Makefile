@@ -42,6 +42,6 @@ $(EXE_PR):		preach_modest.o
 
 .PHONY:clean clean-all
 clean:
-	-@rm -vf *.o *.gen.h
+	-rm -vf *.o *.gen.h
 clean-all:clean
-	-@rm -vf $(EXE_PA) $(EXE_PR)
+	-rm -vf $(EXE_PA) $(EXE_PR)

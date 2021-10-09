@@ -1,34 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.38.2 
-
-Decompiler - Raichu's WIP decompiler
-Copyright (C) Copyright 2021 Thomas Gijsbers
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-Author: Thomas Gijsbers (@raichubender)
-
--->
+<!-- Generated with glade 3.38.2 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
-  <!-- interface-license-type gplv2 -->
-  <!-- interface-name Decompiler -->
-  <!-- interface-description Raichu's WIP decompiler -->
-  <!-- interface-copyright Copyright 2021 Thomas Gijsbers -->
-  <!-- interface-authors Thomas Gijsbers (@raichubender) -->
-  <object class="GtkAboutDialog" id="dialog_about">
+  <object class="GtkAboutDialog" id="about_diag">
     <property name="can-focus">False</property>
     <property name="type-hint">dialog</property>
     <property name="program-name">Glade</property>
@@ -42,6 +16,7 @@ Author: Thomas Gijsbers (@raichubender)
           <object class="GtkButtonBox">
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
+            <signal name="button-press-event" handler="on___glade_unnamed_24_button_press_event" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -57,10 +32,7 @@ Author: Thomas Gijsbers (@raichubender)
   </object>
   <object class="GtkWindow" id="main_window">
     <property name="can-focus">False</property>
-    <property name="window-position">center</property>
-    <property name="default-width">440</property>
-    <property name="default-height">250</property>
-    <signal name="destroy" handler="_ui_quit" swapped="no"/>
+    <signal name="destroy" handler="gtk_main_quit" swapped="no"/>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -123,16 +95,12 @@ Author: Thomas Gijsbers (@raichubender)
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="menu_quit_btn">
+                      <object class="GtkImageMenuItem">
                         <property name="label">gtk-quit</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
-                        <signal name="activate" handler="_ui_quit" object="main_window" swapped="no"/>
-                        <accessibility>
-                          <action action_name="click" description="exit(0);"/>
-                        </accessibility>
                       </object>
                     </child>
                   </object>
@@ -208,13 +176,13 @@ Author: Thomas Gijsbers (@raichubender)
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem">
+                      <object class="GtkImageMenuItem" id="about_menu">
                         <property name="label">gtk-about</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="use-underline">True</property>
                         <property name="use-stock">True</property>
-                        <signal name="activate" handler="ui_about" object="dialog_about" swapped="no"/>
+                        <signal name="activate" handler="on_about_menu_activate" swapped="no"/>
                       </object>
                     </child>
                   </object>
@@ -229,15 +197,17 @@ Author: Thomas Gijsbers (@raichubender)
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
+          <object class="GtkComboBoxText">
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
         </child>
       </object>
-    </child>
-    <child type="titlebar">
-      <placeholder/>
     </child>
   </object>
 </interface>

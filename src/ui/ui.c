@@ -1,43 +1,48 @@
-#include <gtk/gtk.h>
-#include <sys/stat.h>
+#include "ui.h"
+
+GtkBuilder *	builder;
+GtkWidget *		main_window;
+GtkButton *		about_btn;
+GtkAboutDialog *about_diag;
 
 void ui_entry(int argc, const char *argv[])
 {
-	GtkBuilder *builder;
-	GtkWidget * window;
-
 	gtk_init(&argc, &argv);
 
 	builder = gtk_builder_new();
-	struct stat buf;
 	gtk_builder_add_from_file(builder,
-							  stat("ui.glade", &buf) ? "/usr/share/decompiler/ui.glade" : "ui.glade",
+							  SHARE("share/ui.glade", "/usr/share/decompiler/ui.glade"),
 							  NULL);
 	
-	window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
+	main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
 	gtk_builder_connect_signals(builder, NULL);
 
-	g_object_unref(G_OBJECT(builder));
-
-	gtk_widget_show(window);
+	gtk_widget_show(main_window);
 	gtk_main();
 }
 
-void ui_about(GtkMenuItem *mn, GtkWindow *wn)
+void ui_flush(void)
 {
-	gtk_window_present(wn);
+	g_object_unref(G_OBJECT(builder));
+
+	builder = gtk_builder_new();
+	gtk_builder_add_from_file(builder,
+							  SHARE("share/ui.glade", "/usr/share/decompiler/ui.glade"),
+							  NULL);
 }
 
-void _ui_quit(GtkMenuItem *menu_quit_btn, GtkWindow *main_window);
-
-/**********************************
-*
-*     @brief     
-*
-*
-**********************************/
-void _ui_quit(GtkMenuItem *menu_quit_btn, GtkWindow *main_window)
+void on_about_menu_activate(void)
 {
-	// cmdline_main();
-	exit(0);
+	GtkWidget *diag = GTK_WIDGET(gtk_builder_get_object(builder, "about_diag"));
+
+	gtk_builder_connect_signals(builder, NULL);
+	gtk_widget_show(diag);
+
+	about_diag = diag;
+	ui_flush();
+}
+
+void on___glade_unnamed_24_button_press_event(void)
+{
+	gtk_widget_destroy(about_diag);
 }

@@ -45,5 +45,5 @@ clean:
 	@-$(MAKE) -C pass_noodle clean
 
 clean-all:
-	@-rm -rvf src/*.ndl.c include/*.gen.h noodles/*.preproc
+	-rm -rvf src/*.ndl.c include/*.gen.h noodles/*.preproc
 	@-$(MAKE) -C pass_noodle clean-all

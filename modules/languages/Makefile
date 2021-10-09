@@ -43,9 +43,9 @@ $(OUT):
 
 .PHONY:		clean clean-all
 clean:
-	@-rm -rvf $(EXE) $(OUT)
+	-rm -rvf $(EXE) $(OUT)
 	@$(MAKE) -f noodles.mk clean
 
 clean-all:
-	@-rm -rvf $(EXE) $(OUT)
+	-rm -rvf $(EXE) $(OUT)
 	@$(MAKE) -f noodles.mk clean-all

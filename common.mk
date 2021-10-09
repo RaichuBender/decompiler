@@ -29,7 +29,7 @@ INCLUDE	:=	-I$(ROOTPARH)include	\
 	-I$(ROOTPARH)include/organization	\
 	-I$(ROOTPARH)include/disassembler
 
-MAKE	+=	--no-print-directory
+# MAKE	+=	--no-print-directory
 
 
 ifeq ($(PROFILE),RELEASE)
