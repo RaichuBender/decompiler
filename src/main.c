@@ -1,4 +1,5 @@
 /**********************************
+*
 *	 @file      main.c
 *	 @author    Thomas Gijsbers (@RaichuBender)
 *	 @brief     
@@ -26,8 +27,6 @@ BYTE *MEM;
 
 
 RUNTIME_INSTRUCTION_SET *load_module(MODULE_INSTRUCTION_SET *insset);
-
-void ui_entry(int argc, const char *argv[]);
 
 static inline FILE * open_binary(void);
 static inline size_t get_file_size(FILE *fp);
@@ -86,8 +85,7 @@ int main(int argc, const char *argv[])
 
 	rtinsst = load_module(&REGULAR);
 
-	ui_entry(argc, argv);
-	// cmdline_main();
+	cmdline_main();
 
 	return 0;
 }
