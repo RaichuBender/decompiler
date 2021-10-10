@@ -156,10 +156,12 @@ check_valid(	u8 addr2, u16 addr4	)
 
 
 /**********************************
+*
 *	 @brief     
 *
-*@param addr2 
-*@param addr4 
+*	 @param addr2 
+*	 @param addr4 
+*
 **********************************/
 static inline void proc_instruction(u8 addr2, u16 addr4)
 {
@@ -185,8 +187,9 @@ static inline void proc_instruction(u8 addr2, u16 addr4)
 		goto SYMBOLIC;
 
 REGULAR:
-	sprintf(source_mnemonic, THIS_INSTRUCTION.mnemonic_regular, dst_adr);
+	strcpy(source_mnemonic, THIS_INSTRUCTION.mnemonic_regular);
 	format_instruction(addr2, addr4);
+	sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
 	return;
 
 

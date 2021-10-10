@@ -763,8 +763,8 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 		INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);
 		INDENT(token_scope);	ADD_TXT("/* instr_count: */  %d,\n",	 instr_count);
 		INDENT(token_scope);	ADD_TXT("/* cycles:      */  %d,\n",	 cycles);
-		INDENT(token_scope);	ADD_TXT("/* bIsSymbolic: */  %s,\n",	 bIsSymbolic);
 		INDENT(token_scope);	ADD_TXT("/* PARAM:       */  %d,\n",     imm_chars);
+		INDENT(token_scope);	ADD_TXT("/* bIsSymbolic: */  %s,\n",	 bIsSymbolic);
 
 		free(REPRs);
 		// INDENT(token_scope - 1);ADD_TXT("},\n");

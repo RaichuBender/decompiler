@@ -558,7 +558,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 
-		"CP A, %s": ARITHMETIC	GROUP( 0xb8, 8, 1 )
+		"CP %s": ARITHMETIC	GROUP( 0xb8, 8, 1 )
 		{
 			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
 			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}

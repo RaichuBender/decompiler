@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=Decompiler
 Type=Application
-Exec=export/usr/bin/decompiler
-Terminal=false
+Exec=/usr/local/bin/decompiler
+Terminal=true
 GenericName=Raichu's decompiler
