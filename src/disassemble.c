@@ -185,24 +185,21 @@ static inline void proc_instruction(u8 addr2, u16 addr4)
 		goto SYMBOLIC;
 
 REGULAR:
-	strcpy(source_mnemonic, THIS_INSTRUCTION.mnemonic_regular);
+	sprintf(source_mnemonic, THIS_INSTRUCTION.mnemonic_regular, dst_adr);
 	format_instruction(addr2, addr4);
-	sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
 	return;
 
 
 SYMBOLIC:
-	// source_mnemonic = THIS_INSTRUCTION.mnemonic_symbolic;
-	strcpy(source_mnemonic, THIS_INSTRUCTION.mnemonic_symbolic);
-	// format_instruction(addr2, addr4);
-	// strcpy(formatted_mnemonic, THIS_INSTRUCTION.mnemonic_symbolic);
-
 	if (symsym[addr2][dst_adr] != NULL)
-		sprintf(formatted_mnemonic, source_mnemonic, symsym[addr2][dst_adr]);
+		sprintf(source_mnemonic, THIS_INSTRUCTION.mnemonic_symbolic, symsym[addr2][dst_adr]);
 	else if (symsym[0][dst_adr] != NULL)
-		sprintf(formatted_mnemonic, source_mnemonic, symsym[0][dst_adr]);
+		sprintf(source_mnemonic, THIS_INSTRUCTION.mnemonic_symbolic, symsym[0][dst_adr]);
 	else
 		goto REGULAR;
+
+	format_instruction(addr2, addr4);
+	return;
 }
 
 /**********************************

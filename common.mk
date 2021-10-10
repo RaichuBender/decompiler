@@ -42,6 +42,7 @@ else #eq ($(PROFILE),RELEASE)
 ifeq ($(PROFILE),DBG_O2)
 #CFLAGS	:= -O2 -g
 CFLAGS	:= -O2 -g -D_DEBUG
+# CFLAGS	:= -O0 -g -D_DEBUG
 else #eq ($(PROFILE),DBG_O2)
 CFLAGS	:= -O0 -g -D_DEBUG
 endif #eq ($(PROFILE),DBG_O2)
