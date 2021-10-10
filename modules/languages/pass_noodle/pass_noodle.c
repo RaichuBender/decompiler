@@ -222,7 +222,7 @@ int	  grouping_counter = 0;
 
 /*********************************
 *
-*    @brief	Main Entry
+*     @brief	Main Entry
 *
 *    @param[in]	argc 
 *    @param[in]	argv 
@@ -738,9 +738,23 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 
 		free(raw_str);
 
+		char *REPRs = malloc(strlen(REPR) + 1);
+		char *_addr16_ = strstr(REPR, "addr16");
+		if (_addr16_ != NULL)
+		{
+			memcpy(REPRs, REPR, _addr16_ - REPR);
+			memcpy(REPRs + (_addr16_ - REPR), "%s", 2);
+			strcpy(REPRs + (_addr16_ - REPR) + 2, _addr16_ + 6);
+			memcpy(_addr16_, "0x%04x", 6);
+		}
+
+		char *_imm8_ = strstr(REPR, "_imm8_");
+		if (_imm8_ != NULL) memcpy(_imm8_, "0x%02x", 6);
+
 		INDENT(token_scope - 1);ADD_TXT("{\n");
 
 		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", REPR);
+		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", REPRs);
 		INDENT(token_scope);	ADD_TXT("/* opcode:      */  0x%02x,\n", opcode);
 		INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);
 		INDENT(token_scope);	ADD_TXT("/* instr_count: */  %d,\n",	 instr_count);
@@ -987,8 +1001,23 @@ void DECODE_INSTR(void)
 	{
 		INDENT(token_scope - 1);ADD_TXT("{\n");
 
+		char *REPRs = malloc(strlen(REPR) + 1);
+		char *_addr16_ = strstr(REPR, "_addr16");
+		if (_addr16_ != NULL)
+		{
+			memcpy(REPRs, REPR, _addr16_ - REPR);
+			memcpy(REPRs + (_addr16_ - REPR), "%%s", 3);
+			strcpy(REPRs + (_addr16_ - REPR) + 3, _addr16_ + 7);
+			memcpy(_addr16_, "0x%%04x", 7);
+		}
+
+		char *_imm8_ = strstr(REPR, "__imm8_");
+		if (_imm8_ != NULL) memcpy(_imm8_, "0x%%02x", 7);
+
 		sprintf(tmp_logic, sLOGIC, REPR_ARR[grouping_counter]);
 		sprintf(tmp, REPR, REPR_ARR[grouping_counter]);
+		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", tmp);
+		sprintf(tmp, REPRs, REPR_ARR[grouping_counter]);
 		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", tmp);
 		INDENT(token_scope);	ADD_TXT("/* opcode:      */  0x%02x,\n", op_c);
 		INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);

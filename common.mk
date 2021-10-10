@@ -33,19 +33,22 @@ INCLUDE	:=	-I$(ROOTPARH)include	\
 
 
 ifeq ($(PROFILE),RELEASE)
-
+CFLAGS	:= -O2 -s
 ifeq ($(ADD_SUFFIX),TRUE)
 EXE_SFX	:= $(REL_SUFFIX)
 endif
-
-CFLAGS	:= -O2 -s
 else #eq ($(PROFILE),RELEASE)
+
+ifeq ($(PROFILE),DBG_O2)
+CFLAGS	:= -O2 -g
+else #eq ($(PROFILE),DBG_O2)
+CFLAGS	:= -O0 -g -D_DEBUG
+endif #eq ($(PROFILE),DBG_O2)
 
 ifeq ($(ADD_SUFFIX),TRUE)
 EXE_SFX	:= $(DBG_SUFFIX)
 endif
 
-CFLAGS	:= -O0 -g -D_DEBUG
 endif #eq ($(PROFILE),RELEASE)
 
 

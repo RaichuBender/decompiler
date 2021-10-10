@@ -64,7 +64,7 @@ static inline void serialize_args(int argc, const char *argv[])
 
 /**********************************
 *
-*     	 @brief     
+*     @brief     
 *
 *
 **********************************/
@@ -81,7 +81,7 @@ static inline void open_project(void)
 
 /**********************************
 *
-*     	 @brief     
+*     @brief     
 *
 *
 **********************************/
@@ -98,7 +98,7 @@ static inline void open_binary(void)
 
 /**********************************
 *
-*     	 @brief     
+*     @brief     
 *
 *
 **********************************/

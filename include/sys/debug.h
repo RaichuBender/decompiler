@@ -12,7 +12,7 @@
 *
 *    @name	WARN
 *
-*    @brief	Shows diagnostics
+*     @brief	Shows diagnostics
 *			upon non-fatal error
 *
 *    @param[in]   fmt		Format string for warning message
@@ -27,7 +27,7 @@
 *
 *    @name	FATAL
 *
-*    @brief	Aborts execution
+*     @brief	Aborts execution
 *			and shows diagnostics
 *
 *    @param[in]   fmt		Format string for error message
@@ -47,7 +47,7 @@
 *
 *    @name	WARN
 *
-*    @brief	Shows diagnostics
+*     @brief	Shows diagnostics
 *			upon non-fatal error
 *
 *    @param[in]   fmt		Format string for warning message
@@ -98,7 +98,7 @@
 *
 *	 @name	FATAL
 *
-*    @brief	Aborts execution and shows diagnostics
+*     @brief	Aborts execution and shows diagnostics
 *
 *    @param[in]   fmt		Format string for error message
 *    @param[in] __VA_ARGS__	Variables to be formatted

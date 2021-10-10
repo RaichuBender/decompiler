@@ -39,7 +39,7 @@ static inline BOOL	 dc_check_valid(u8 addr2, u16 addr4);
 static inline BOOL dc_check_valid(u8 addr2, u16 addr4)
 {
 	if ((rtinsst->instructions[MEM[byte_ptr]].opcode == -1)
-	||  (rtinsst->instructions[MEM[byte_ptr]].mnemonic == NULL))
+	||  (rtinsst->instructions[MEM[byte_ptr]].mnemonic_regular == NULL))
 	{
 		printf(DC_FMT_INVALID,
 				addr2, addr4,

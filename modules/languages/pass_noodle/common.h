@@ -76,7 +76,7 @@ typedef unsigned char BOOL;
 *
 *	 @name	ADD_TXT
 *
-*    @brief	Unconditionally append
+*     @brief	Unconditionally append
 *			(formatted) text to the
 *			output file
 *
@@ -96,7 +96,7 @@ typedef unsigned char BOOL;
 *
 *    @name	DBG_DUMP
 *
-*    @brief	Append (formatted) debug
+*     @brief	Append (formatted) debug
 *			text to the output file,
 *    		if enabled
 *
@@ -111,7 +111,7 @@ typedef unsigned char BOOL;
 *
 *    @name	DBG_DUMP
 *    
-*    @brief	Append (formatted) debug
+*     @brief	Append (formatted) debug
 *    		text to the output file,
 *    		if enabled
 *    
@@ -129,7 +129,7 @@ typedef unsigned char BOOL;
 *
 *	 @name	OUTPUT_DBG_DOC
 *
-*    @brief	Append (formatted)
+*     @brief	Append (formatted)
 *			documentation text to
 *			the output file,
 *			if enabled
@@ -146,7 +146,7 @@ typedef unsigned char BOOL;
 *
 *	 @name	OUTPUT_DBG_DOC
 *
-*    @brief	Append (formatted)
+*     @brief	Append (formatted)
 *			documentation text to
 *			the output file,
 * 			if enabled

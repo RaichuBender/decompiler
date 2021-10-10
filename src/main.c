@@ -69,7 +69,7 @@ static inline size_t get_file_size(FILE *fp)
 int main(int argc, const char *argv[])
 {
 	parse_cmdline(argc, argv);
-	dadr = 0;
+	dadr = 0x0100;
 
 	FILE *fp = open_binary();
 
@@ -78,6 +78,7 @@ int main(int argc, const char *argv[])
 	fread(MEM, 0x400, file_sz / 0x400, fp);
 
 	byte_ptr = dadr - 1;
+	// byte_ptr = 0x01ab - 1;
 
 	// TODO do proper size deduction
 	source_mnemonic	   = malloc(256);
@@ -86,6 +87,8 @@ int main(int argc, const char *argv[])
 	rtinsst = load_module(&REGULAR);
 
 	cmdline_main();
+// int ui_main(int argc, const char *argv[]);
+// 	return ui_main(argc, argv);
 
 	return 0;
 }
@@ -113,7 +116,7 @@ static inline FILE *open_binary(void)
 	{
 		char share[260];
 		char *fn2 = share;
-		sprintf(fn2, "%s%s", "/usr/share/decompiler/", fn);
+		sprintf(fn2, "%s%s", "/usr/local/share/decompiler/", fn);
 		fp = fopen(fn2, "rb");
 
 		if (fp == NULL)

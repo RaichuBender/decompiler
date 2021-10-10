@@ -34,7 +34,7 @@ void log_instset(MODULE_INSTRUCTION_SET *instset, const char *fn)
 		fprintf(fp, "%1xx ", y);
 		for (int x = 0; x < 0x10; ++x)
 		{
-			char *mnm = instset->instructions[(y<<4)|x].mnemonic;
+			char *mnm = instset->instructions[(y<<4)|x].mnemonic_regular;
 
 			fprintf(fp, "| %s", mnm);
 

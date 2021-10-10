@@ -7,7 +7,8 @@
 
 #define ASSIGN_INST(_idx0_, _idx1_)                                                              \
 	{                                                                                            \
-		sorted->instructions[_idx0_].mnemonic	   = insset->instructions[_idx1_].mnemonic;      \
+		sorted->instructions[_idx0_].mnemonic_regular	   = insset->instructions[_idx1_].mnemonic_regular;      \
+		sorted->instructions[_idx0_].mnemonic_symbolic	   = insset->instructions[_idx1_].mnemonic_symbolic;      \
 		sorted->instructions[_idx0_].opcode		   = insset->instructions[_idx1_].opcode;        \
 		sorted->instructions[_idx0_].operation	   = insset->instructions[_idx1_].operation;     \
 		sorted->instructions[_idx0_].operand_count = insset->instructions[_idx1_].operand_count; \

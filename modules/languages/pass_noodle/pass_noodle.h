@@ -53,7 +53,8 @@ char *CYCLES	  = NULL;
 
 OPCODE		  opcode	  = 0;
 char *		  operation	  = NULL;
-char *		  mnemonic	  = INVALID;
+char *		  mnemonic_regular	  = INVALID;
+char *		  mnemonic_symbolic	  = INVALID;
 int			  param_count = 0;
 PARAM_KIND *  params	  = NULL;
 unsigned int *param_idx	  = NULL;

@@ -178,9 +178,9 @@ LANGUAGE(sm83_asm)
 			"HALT;\n"
 		}
 
-		"<<CB>> 0x%02x", IMM8:	SPECIAL	0xcb	2 8
+		"<<CB>> _imm8_", IMM8:	SPECIAL	0xcb	2 8
 		{
-			"// <<CB>> 0x%02x;\n"
+			"// <<CB>> _imm8_;\n"
 		}
 
 	## Loads
@@ -226,7 +226,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 
 		^%LOAD( A, 0x78 )
 
-		"LD %s, 0x%%02x", IMM8: MOV_STOR	GROUP( 0x06, 8, 8 )
+		"LD %s, __imm8_", IMM8: MOV_STOR	GROUP( 0x06, 8, 8 )
 		{
 			REPR:	{	"B",	"C",	"D",	"E",	"H",	"L",	"(HL)",	"A"   }
 			PARAM:	{	 B,	C,	D,	E,	H,	L,	*8(HL),	A	}
@@ -234,17 +234,17 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			CYCLES:	{	 8,	8,	8,	8,	8,	8,	12,	8	}
 
 			{
-				"%s = 0x%%02x;\n"
+				"%s = _imm8_;\n"
 			}
 		}
 
 		"LDH (0xff%02x), A", IMM8: MOV_STOR	0xe0	2 12
 		{
-			"*(0xff00|0x%02x) = A;\n"
+			"*(0xff00|_imm8_) = A;\n"
 		}
 		"LDH A, (0xff%02x)", IMM8: MOV_STOR	0xf0	2 12
 		{
-			"A = *(0xff00|0x%02x);\n"
+			"A = *(0xff00|_imm8_);\n"
 		}
 
 		"LD %s, A":	MOV_STOR	GROUP( 0x02, 4, 16 )
@@ -279,17 +279,17 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			"A = *(0xff00|C);\n"
 		}
 
-		"LD (0x%04x), A", IMM16: MOV_STOR	0xea	3 16
+		"LD (addr16), A", IMM16: MOV_STOR	0xea	3 16
 		{
-			"(*0x%04x) = A;\n"
+			"(*_addr16_) = A;\n"
 		}
-		"LD A, (0x%04x)", IMM16: MOV_STOR	0xfa	3 16
+		"LD A, (addr16)", IMM16: MOV_STOR	0xfa	3 16
 		{
-			"A = (*0x%04x);\n"
+			"A = (*_addr16_);\n"
 		}
 
 		# 16-bit Loads
-		"LD %s, 0x%%04x", IMM16:	MOV_STOR	GROUP( 0x01, 4, 16 )
+		"LD %s, _addr16", IMM16:	MOV_STOR	GROUP( 0x01, 4, 16 )
 		{
 			REPR:	{	"BC",	"DE",	"HL",	"SP"   }
 			PARAM:	{	BC,	DE,	HL,	SP  }
@@ -297,13 +297,13 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			CYCLES:			12
 
 			{
-				"%s = 0x%%04x;\n"
+				"%s = _addr16_;\n"
 			}
 		}
 
-		"LD (0x%04x), SP", IMM16:	MOV_STOR	0x08	3 20
+		"LD (addr16), SP", IMM16:	MOV_STOR	0x08	3 20
 		{
-			"(*0x%04x) = SP;\n"
+			"(*_addr16_) = SP;\n"
 		}
 
 		"POP %s":	MOV_STOR	GROUP( 0xc1, 4, 16 )
@@ -380,7 +380,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"ADD A, 0x%02x", IMM8: ARITHMETIC	0xc6	2 8
+		"ADD A, _imm8_", IMM8: ARITHMETIC	0xc6	2 8
 		{
 			"A += 0x%1$02x;\n"
 			"ZF = A == (0 - 0x%1$02x);\n"
@@ -409,7 +409,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"ADC A, 0x%02x", IMM8: ARITHMETIC	0xce	2 8
+		"ADC A, _imm8_", IMM8: ARITHMETIC	0xce	2 8
 		{
 			"if (CF)\n"
 			"	A += 0x%1$02x + 1;\n"
@@ -438,7 +438,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"SUB A, 0x%02x", IMM8: ARITHMETIC	0xd6	2 8
+		"SUB A, _imm8_", IMM8: ARITHMETIC	0xd6	2 8
 		{
 			"A -= 0x%1$02x;\n"
 			"ZF = A == 0x%1$02x;\n"
@@ -467,7 +467,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"SBC A, 0x%02x", IMM8: ARITHMETIC	0xde	2 8
+		"SBC A, _imm8_", IMM8: ARITHMETIC	0xde	2 8
 		{
 			"if (CF)\n"
 			"	A -= (0x%1$02x + 1);\n"
@@ -495,7 +495,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"AND 0x%02x", IMM8: ARITHMETIC	0xe6	2 8
+		"AND _imm8_", IMM8: ARITHMETIC	0xe6	2 8
 		{
 			"A &= 0x%1$02x;\n"
 			"ZF = (A & 0x%1$02x) == 0;\n"
@@ -521,7 +521,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"XOR 0x%02x", IMM8: ARITHMETIC	0xee	2 8
+		"XOR _imm8_", IMM8: ARITHMETIC	0xee	2 8
 		{
 			"A ^= 0x%1$02x;\n"
 			"ZF = (A ^ 0x%1$02x) == 0;\n"
@@ -547,7 +547,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"OR 0x%02x", IMM8: ARITHMETIC	0xf6	2 8
+		"OR _imm8_", IMM8: ARITHMETIC	0xf6	2 8
 		{
 		OPT REPR:
 			"A |= 0x%1$02x;\n"
@@ -573,7 +573,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"CP 0x%02x", IMM8: ARITHMETIC	0xfe	2 8
+		"CP _imm8_", IMM8: ARITHMETIC	0xfe	2 8
 		{
 			"ZF = A == 0x%1$02x;\n"
 			"CF = A < 0x%1$02x;\n"
@@ -654,18 +654,18 @@ MACRO:LOAD( _REG_, _OP_B_ )
 
 	##	Branching
 		# Unconditional jumps
-		"JP 0x%04x", IMM16: JUMP	0xc3	3 16
+		"JP addr16", IMM16: JUMP	0xc3	3 16
 		{
 			"goto lbl_%04x;\n"
 		}
 
-		"JR 0x%04x", IMM8_R: JUMP	0x18	2 12
+		"JR addr16", IMM8_R: JUMP	0x18	2 12
 		{
 			"goto lbl_%04x;\n"
 		}
 
 		# Conditional jumps
-		"JP %s, 0x%%04x", IMM16: COND_JUMP	GROUP(  0xc2, 4, 8  )
+		"JP %s, _addr16", IMM16: COND_JUMP	GROUP(  0xc2, 4, 8  )
 		{
 			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
 			PARAM:	{	ZF==0,	ZF==1,	CF==0,	CF==1	}
@@ -678,7 +678,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"JR %s, 0x%%04x", IMM8_R: COND_JUMP	GROUP(  0x20, 4, 8  )
+		"JR %s, _addr16", IMM8_R: COND_JUMP	GROUP(  0x20, 4, 8  )
 		{
 			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
 			PARAM:	{	ZF==0,	ZF==1,	CF==0,	CF==1	}
@@ -705,13 +705,13 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		}
 
 		# Unconditional calls
-		"CALL 0x%04x", IMM16: CALL	0xcd	3 24
+		"CALL addr16", IMM16: CALL	0xcd	3 24
 		{
 			"fn_%04x();\n"
 		}
 
 		# Conditional calls
-		"CALL %s, 0x%%04x", IMM16: COND_CALL	GROUP(  0xc4, 4, 8  )
+		"CALL %s, _addr16", IMM16: COND_CALL	GROUP(  0xc4, 4, 8  )
 		{
 			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
 			PARAM:	0

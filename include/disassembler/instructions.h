@@ -74,7 +74,8 @@ typedef enum _OPERATION
 
 typedef struct _MDL_INSTRUCTION
 {
-	char *			 mnemonic;
+	char *			 mnemonic_regular;
+	char *			 mnemonic_symbolic;
 	u8				 opcode;
 	OPERATION        operation;
 	u32				 operand_count;
@@ -88,7 +89,8 @@ typedef struct _MDL_INSTRUCTION
 
 typedef struct _INSTRUCTION
 {
-	char *			 mnemonic;
+	char *			 mnemonic_regular;
+	char *			 mnemonic_symbolic;
 	u8				 opcode;
 	OPERATION        operation;
 //	u64				 addr;

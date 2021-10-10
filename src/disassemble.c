@@ -133,7 +133,7 @@ MDL_INSTRUCTION *decode_opcode(BYTE *raw_bytes)
 	char *		 mnm	= malloc(32);
 	sprintf(mnm, "LD %s, %s", tmprp[tmpadr], "A");
 
-	pINSTR->mnemonic		= mnm;
+	pINSTR->mnemonic_regular		= mnm;
 	pINSTR->operand_count	= 1;
 #if 0
 	pINSTR->addr			= tmpadr++;
@@ -149,60 +149,87 @@ MDL_INSTRUCTION *decode_opcode(BYTE *raw_bytes)
 #include <string.h>
 #include "sys/debug.h"
 #include "sys/common.h"
-#include "sys/terminal_colors.h"
+
+
+#ifndef _GUI
+#	include "sys/terminal_colors.h"
+#else // _GUI
+#	include "sys/gui_colors.h"
+#endif// _GUI
+
+
 #include "language.h"
 
-static const char OPERATION_COLOR[10][20] =
-{
-#if 1
-	/* INVALID    */ C_RED,
-	/* NOTHING    */ CB_BLACK,
-	/* SPECIAL    */ CB_BLUE,
-	/* MOV_STOR   */ C_MAGENTA,
-	/* ARITHMETIC */ CB_MAGENTA,
-	/* BIT_MANIP  */ CB_WHITE,
-	/* JUMP       */ CB_GREEN,
-	/* CALL       */ CB_YELLOW,
-	/* RETURN     */ CB_RED,
-	/* END        */ NULL,		// TODO
-#else
-	"", "", "", "",
-	"", "", "", "",
-	"", "",
-#endif
-};
+// extern char *ui_text;
+// #define printf(fmt...) ui_text += sprintf(ui_text, fmt);
 
-#define MNEMONIC_FMT_VALID	   bTermCol ? MNEMONIC_FMT_VALID_C : MNEMONIC_FMT_VALID_G
-#define MNEMONIC_FMT_INVALID   bTermCol ? MNEMONIC_FMT_INVALID_C : MNEMONIC_FMT_INVALID_G
-#define MNM_ONE				   bTermCol ? MNM_ONE_C : MNM_ONE_G
-#define MNM_TWO				   bTermCol ? MNM_TWO_C : MNM_TWO_G
-#define MNM_THREE			   bTermCol ? MNM_THREE_C : MNM_THREE_G
+#ifndef  _NOCOLOR
 
-#define MNEMONIC_FMT_VALID_C   C_MAGENTA "%02x" C_WHITE ":" CB_BLUE "%04x\t\t" F_RESET "%s\n" F_RESET
-#define MNEMONIC_FMT_INVALID_C C_RED "%02x:%04x" C_RED "\t\t0x%02x\t< ¡¡¡ invalid !!! >\n" F_RESET
+	static const char OPERATION_COLOR[13][20] = {
+		/* INVALID    */ C_RED,
+		/* NOTHING    */ CB_BLACK,
+		/* SPECIAL    */ CB_BLUE,
+		/* MOV_STOR   */ C_MAGENTA,
+		/* ARITHMETIC */ CB_MAGENTA,
+		/* BIT_MANIP  */ CB_WHITE,
+		/* JUMP       */ CB_GREEN,
+		/* COND_JUMP  */ CB_GREEN,
+		/* CALL       */ CB_YELLOW,
+		/* COND_CALL  */ CB_YELLOW,
+		/* RETURN     */ CB_RED,
+		/* COND_RETURN*/ CB_RED,
+		/* END        */ NULL, // TODO
+	};
 
-#define MNEMONIC_FMT_VALID_G   "%02x:%04x\t\t%s\n"
-#define MNEMONIC_FMT_INVALID_G "%02x:%04x\t\t0x%02x\t< ¡¡¡ invalid !!! >\n"
+#	define MNEMONIC_FMT_VALID		bTermCol ? MNEMONIC_FMT_VALID_C		: MNEMONIC_FMT_VALID_G
+#	define MNEMONIC_FMT_INVALID		bTermCol ? MNEMONIC_FMT_INVALID_C	: MNEMONIC_FMT_INVALID_G
+#	define MNM_ONE					bTermCol ? MNM_ONE_C				: MNM_ONE_G
+#	define MNM_TWO					bTermCol ? MNM_TWO_C				: MNM_TWO_G
+#	define MNM_THREE				bTermCol ? MNM_THREE_C				: MNM_THREE_G
 
-#define MNM_ONE_C			   "%s%s" F_RESET
-#define MNM_TWO_C			   "%s%s\t" C_GREEN "%s" F_RESET
-#define MNM_THREE_C			   "%s%s\t" C_CYAN "%s" F_RESET "%c" C_GREEN "%s" F_RESET
+#	define MNEMONIC_FMT_VALID_C		C_MAGENTA	"%02x"		C_WHITE	":"	CB_BLUE "%04x\t\t"		F_RESET "%s\n"	F_RESET
+#	define MNEMONIC_FMT_INVALID_C	C_RED		"%02x:%04x"	C_RED	"\t\t0x%02x\t< ¡¡¡ invalid !!! >\n"			F_RESET
 
-#define MNM_ONE_G			   "%s%s"
-#define MNM_TWO_G			   "%s%s\t%s"
-#define MNM_THREE_G			   "%s%s\t%s%c%s"
+#	define MNEMONIC_FMT_VALID_G		"%02x:%04x\t\t%s\n"
+#	define MNEMONIC_FMT_INVALID_G	"%02x:%04x\t\t0x%02x\t< ¡¡¡ invalid !!! >\n"
 
-static inline BOOL	 check_valid(u8 addr2, u16 addr4);
-static inline void	 format_instruction(u8 addr2, u16 addr4);
-static inline void	 print_formatted(u8 addr2, u16 addr4);
+#	define MNM_ONE_C				"%s%s"		F_RESET
+#	define MNM_TWO_C				"%s%s\t"	C_GREEN "%s"	F_RESET
+#	define MNM_THREE_C				"%s%s\t"	C_CYAN "%s"		F_RESET "%c"	C_GREEN "%s"	F_RESET
+
+#	define MNM_ONE_G				"%s%s"
+#	define MNM_TWO_G				"%s%s\t%s"
+#	define MNM_THREE_G				"%s%s\t%s%c%s"
+
+#else // _NOCOLOR
+
+	static const char OPERATION_COLOR[13][20] = { "" };
+
+#	define MNEMONIC_FMT_VALID		"%02x:%04x\t\t%s\n"
+#	define MNEMONIC_FMT_INVALID		"%02x:%04x\t\t0x%02x\t< ¡¡¡ invalid !!! >\n"
+
+#	define MNM_ONE					"%s%s"
+#	define MNM_TWO					"%s%s\t%s"
+#	define MNM_THREE				"%s%s\t%s%c%s"
+
+#endif// _NOCOLOR
+
+
+static inline BOOL	 check_valid		(u8 addr2, u16 addr4);
+static inline void	 format_instruction	(u8 addr2, u16 addr4);
+static inline void   color_syntax		(u8 addr2, u16 addr4);
+static inline void	 print_formatted	(u8 addr2, u16 addr4);
 
 u16						 dadr;
 size_t					 file_sz;
 int						 byte_ptr;
-char *					 source_mnemonic;
-char *					 formatted_mnemonic;
+char 					*source_mnemonic;
+char 					*formatted_mnemonic;
 RUNTIME_INSTRUCTION_SET *rtinsst;
 BOOL					 bTermCol = TRUE;
+BOOL					 bRetRet  = FALSE;
+
+extern char *symsym[0x40][0x10000];
 
 /**********************************
 *
@@ -214,9 +241,11 @@ BOOL					 bTermCol = TRUE;
 *    @return BOOL 
 *
 **********************************/
-static inline BOOL check_valid(u8 addr2, u16 addr4)
+static inline BOOL
+check_valid(	u8 addr2, u16 addr4	)
 {
-	if ((rtinsst->instructions[MEM[byte_ptr]].opcode == -1) || (rtinsst->instructions[MEM[byte_ptr]].mnemonic == NULL))
+	if ((rtinsst->instructions[MEM[byte_ptr]].opcode   == -1  )
+	||  (rtinsst->instructions[MEM[byte_ptr]].mnemonic_regular == NULL))
 	{
 		printf(MNEMONIC_FMT_INVALID,
 				addr2, addr4,
@@ -235,31 +264,17 @@ static inline BOOL check_valid(u8 addr2, u16 addr4)
 *    @param addr4 
 *
 **********************************/
-static inline void format_instruction(u8 addr2, u16 addr4)
+static inline void
+format_instruction(	u8 addr2, u16 addr4	)
 {
-/********************
-*	@brief First	*	NOP
-********************/
-	char *first = source_mnemonic;
-
-/********************
-*	@brief Second	*	ST0P 0
-********************/
+	char *first	 = source_mnemonic;
 	char *second = strchr(first, L' ');
 
 	if (second != NULL)
 	{
-		*(second++) = '\0';
-
-/****************************
-*	@brief Comma or space	*
-****************************/
-		char delmtr = ',';
-
-/********************
-*	@brief Third	*	LD (HL), A
-********************/
-		char *third = strchr(second, L',');
+		*(second++)	 = '\0';
+		char  delmtr = ',';
+		char *third	 = strchr(second, L',');
 
 		if (third == NULL)
 		{
@@ -267,9 +282,11 @@ static inline void format_instruction(u8 addr2, u16 addr4)
 			delmtr = ' ';
 		}
 		if (third == NULL)
+		{
 			sprintf(formatted_mnemonic, MNM_TWO,
 					OPERATION_COLOR[rtinsst->instructions[MEM[byte_ptr]].operation],
 					first, second);
+		}
 		else
 		{
 			*(third++) = '\0';
@@ -277,31 +294,55 @@ static inline void format_instruction(u8 addr2, u16 addr4)
 					OPERATION_COLOR[rtinsst->instructions[MEM[byte_ptr]].operation],
 					first, second, delmtr, third);
 		}
-	}	// if (second != NULL)
-	else
-		// strcpy(formatted_mnemonic, source_mnemonic);
+	}
+	else // if not (second != NULL)
+	{
 		sprintf(formatted_mnemonic, MNM_ONE,
 				OPERATION_COLOR[rtinsst->instructions[MEM[byte_ptr]].operation],
 				first);
+	}
+
+	color_syntax(addr2, addr4);
+}
+
+
+/**********************************
+*
+*     @brief     
+*
+*
+**********************************/
+static inline void
+color_syntax(	u8 addr2, u16 addr4	)
+{
+	int dst_adr;
 
 	switch (rtinsst->instructions[MEM[byte_ptr]].imm)
 	{
-		int dst_adr;
 	case (2):
-		dst_adr = *(u8  *)(&MEM[byte_ptr + 1]);
+		dst_adr = *(u8 *)(&MEM[byte_ptr + 1]);
 		sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
-		break;
+		return;
 
 	case (3):
-		dst_adr = *(s8  *)(&MEM[byte_ptr + 1]) + (s16)(addr4 + 2);
-		sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
-		break;
+		dst_adr = *(s8 *)(&MEM[byte_ptr + 1]) + (s16)(addr4 + 2);
+		if ((symsym[addr2][dst_adr] == NULL)
+		||  (*rtinsst->instructions[MEM[byte_ptr]].mnemonic_symbolic == 0))
+			sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
+		else
+			sprintf(formatted_mnemonic, rtinsst->instructions[MEM[byte_ptr]].mnemonic_symbolic, symsym[addr2][dst_adr]);
+		return;
 
 	case (4):
 		dst_adr = *(u16 *)(&MEM[byte_ptr + 1]);
-		sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
+		if ((symsym[addr2][dst_adr] == NULL)
+		||  (*rtinsst->instructions[MEM[byte_ptr]].mnemonic_symbolic == 0))
+			sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
+		else
+			sprintf(formatted_mnemonic, rtinsst->instructions[MEM[byte_ptr]].mnemonic_symbolic, symsym[addr2][dst_adr]);
 	}
 }
+
 
 /**********************************
 *
@@ -311,8 +352,12 @@ static inline void format_instruction(u8 addr2, u16 addr4)
 *    @param addr4 
 *
 **********************************/
-static inline void print_formatted(u8 addr2, u16 addr4)
+static inline void
+print_formatted(	u8 addr2, u16 addr4	)
 {
+	if (symsym[addr2][addr4] != NULL)
+		printf("%s:\n", symsym[addr2][addr4]);
+
 	printf(MNEMONIC_FMT_VALID,
 			addr2, addr4,
 			formatted_mnemonic);
@@ -320,26 +365,36 @@ static inline void print_formatted(u8 addr2, u16 addr4)
 
 /**********************************
 *
-*	 @brief     
+*	 @brief     Disassemble a
+*				code block
 *
 **********************************/
 void disassemble(void)
 {
-	for (; ++byte_ptr < file_sz; )
+	for (; ++byte_ptr < file_sz;)
 	{
-		u8  addr2 = (byte_ptr >> 14) & 0xff;
-		u16 addr4 = ((byte_ptr >= 0x4000) << 14)  |  (byte_ptr  & 0x3fff);
+		//  Split absolute address into relative hardware address
+		//		and memory page / ROM|RAM bank
+		u8	addr2 =  (byte_ptr >> 14) & 0xff;
+		u16 addr4 = ((byte_ptr >= 0x4000) << 14) | (byte_ptr & 0x3fff);
 
-		if (!check_valid(addr2, addr4))	 continue;
-		strcpy(source_mnemonic, rtinsst->instructions[MEM[byte_ptr]].mnemonic);
+		if (!check_valid(addr2, addr4))
+			continue;	//	No further processing if the instruction is
+						//		illegal / outside of defined range
+
+		strcpy(source_mnemonic, rtinsst->instructions[MEM[byte_ptr]].mnemonic_regular);
 		format_instruction(addr2, addr4);
 		print_formatted(addr2, addr4);
 
-SKIP_PRINT:
 		ASSERT(rtinsst->instructions[MEM[byte_ptr]].operand_count != 0);
 		byte_ptr += (rtinsst->instructions[MEM[byte_ptr]].operand_count - 1);
 
-		if (rtinsst->instructions[MEM[byte_ptr]].operation == RETURN)	 return;
+			//	 If disassembling subroutines individually...
+		if (	(bRetRet)
+			//	 ...then abort at first encountered unconditional return.
+		&&  	(rtinsst->instructions[MEM[byte_ptr]].operation
+				 == RETURN)	)
+			return;
 	}
 	// while (++byte_ptr < file_sz)
 }
