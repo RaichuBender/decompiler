@@ -169,20 +169,22 @@ static inline void proc_instruction(u8 addr2, u16 addr4)
 	{
 	case (2):
 		dst_adr = *(u8 *)(&MEM[byte_ptr + 1]);
-		break;
+		goto REGULAR;
 
 	case (3):
 		dst_adr = *(s8 *)(&MEM[byte_ptr + 1]) + (s16)(addr4 + 2);
 		break;
 
 	case (4):
+	default:
 		dst_adr = *(u16 *)(&MEM[byte_ptr + 1]);
 		break;
 	}
 
-	if (strstr(THIS_INSTRUCTION.mnemonic_symbolic, "%s") != NULL)
+	if (THIS_INSTRUCTION.bIsSymbolic != FALSE)
 		goto SYMBOLIC;
 
+REGULAR:
 	strcpy(source_mnemonic, THIS_INSTRUCTION.mnemonic_regular);
 	format_instruction(addr2, addr4);
 	sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
@@ -192,14 +194,15 @@ static inline void proc_instruction(u8 addr2, u16 addr4)
 SYMBOLIC:
 	// source_mnemonic = THIS_INSTRUCTION.mnemonic_symbolic;
 	strcpy(source_mnemonic, THIS_INSTRUCTION.mnemonic_symbolic);
-	format_instruction(addr2, addr4);
+	// format_instruction(addr2, addr4);
+	// strcpy(formatted_mnemonic, THIS_INSTRUCTION.mnemonic_symbolic);
 
 	if (symsym[addr2][dst_adr] != NULL)
-		sprintf(formatted_mnemonic, formatted_mnemonic, symsym[addr2][dst_adr]);
+		sprintf(formatted_mnemonic, source_mnemonic, symsym[addr2][dst_adr]);
 	else if (symsym[0][dst_adr] != NULL)
-		sprintf(formatted_mnemonic, formatted_mnemonic, symsym[0][dst_adr]);
+		sprintf(formatted_mnemonic, source_mnemonic, symsym[0][dst_adr]);
 	else
-		sprintf(formatted_mnemonic, formatted_mnemonic, dst_adr);
+		goto REGULAR;
 }
 
 /**********************************

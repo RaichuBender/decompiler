@@ -5,16 +5,17 @@
 
 #include "log_module.h"
 
-#define ASSIGN_INST(_idx0_, _idx1_)                                                              \
-	{                                                                                            \
-		sorted->instructions[_idx0_].mnemonic_regular	   = insset->instructions[_idx1_].mnemonic_regular;      \
-		sorted->instructions[_idx0_].mnemonic_symbolic	   = insset->instructions[_idx1_].mnemonic_symbolic;      \
-		sorted->instructions[_idx0_].opcode		   = insset->instructions[_idx1_].opcode;        \
-		sorted->instructions[_idx0_].operation	   = insset->instructions[_idx1_].operation;     \
-		sorted->instructions[_idx0_].operand_count = insset->instructions[_idx1_].operand_count; \
-		sorted->instructions[_idx0_].cycles		   = insset->instructions[_idx1_].cycles;        \
-		sorted->instructions[_idx0_].imm		   = insset->instructions[_idx1_].imm;           \
-		sorted->instructions[_idx0_].logic		   = insset->instructions[_idx1_].logic;         \
+#define ASSIGN_INST(_idx0_, _idx1_)                                                                      \
+	{                                                                                                    \
+		sorted->instructions[_idx0_].mnemonic_regular  = insset->instructions[_idx1_].mnemonic_regular;  \
+		sorted->instructions[_idx0_].mnemonic_symbolic = insset->instructions[_idx1_].mnemonic_symbolic; \
+		sorted->instructions[_idx0_].opcode			   = insset->instructions[_idx1_].opcode;            \
+		sorted->instructions[_idx0_].operation		   = insset->instructions[_idx1_].operation;         \
+		sorted->instructions[_idx0_].operand_count	   = insset->instructions[_idx1_].operand_count;     \
+		sorted->instructions[_idx0_].cycles			   = insset->instructions[_idx1_].cycles;            \
+		sorted->instructions[_idx0_].imm			   = insset->instructions[_idx1_].imm;               \
+		sorted->instructions[_idx0_].bIsSymbolic	   = insset->instructions[_idx1_].bIsSymbolic;       \
+		sorted->instructions[_idx0_].logic			   = insset->instructions[_idx1_].logic;             \
 	}
 
 /**********************************

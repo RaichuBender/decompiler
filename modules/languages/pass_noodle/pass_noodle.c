@@ -741,9 +741,11 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 		char *REPRs = malloc(strlen(REPR) + 1);
 		*REPRs = '\0';
 
+		char bIsSymbolic[] = "FALSE";
 		char *_addr16_ = strstr(REPR, "addr16");
 		if (_addr16_ != NULL)
 		{
+			strcpy(bIsSymbolic, "TRUE");
 			memcpy(REPRs, REPR, _addr16_ - REPR);
 			memcpy(REPRs + (_addr16_ - REPR), "%s", 2);
 			strcpy(REPRs + (_addr16_ - REPR) + 2, _addr16_ + 6);
@@ -761,8 +763,10 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 		INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);
 		INDENT(token_scope);	ADD_TXT("/* instr_count: */  %d,\n",	 instr_count);
 		INDENT(token_scope);	ADD_TXT("/* cycles:      */  %d,\n",	 cycles);
+		INDENT(token_scope);	ADD_TXT("/* bIsSymbolic: */  %s,\n",	 bIsSymbolic);
 		INDENT(token_scope);	ADD_TXT("/* PARAM:       */  %d,\n",     imm_chars);
 
+		free(REPRs);
 		// INDENT(token_scope - 1);ADD_TXT("},\n");
 
 		return;
@@ -996,6 +1000,23 @@ void DECODE_INSTR(void)
 	char *tmp = malloc(256);
 	char *tmp_logic = malloc(strlen(sLOGIC) * 2);
 
+	char *REPRs = malloc(strlen(REPR) + 1);
+	*REPRs = '\0';
+
+	char bIsSymbolic[] = "FALSE";
+	char *_addr16_ = strstr(REPR, "_addr16");
+	if (_addr16_ != NULL)
+	{
+		strcpy(bIsSymbolic, "TRUE");
+		memcpy(REPRs, REPR, _addr16_ - REPR);
+		memcpy(REPRs + (_addr16_ - REPR), "%%s", 3);
+		strcpy(REPRs + (_addr16_ - REPR) + 3, _addr16_ + 7);
+		memcpy(_addr16_, "0x%%04x", 7);
+	}
+
+	char *_imm8_ = strstr(REPR, "__imm8_");
+	if (_imm8_ != NULL) memcpy(_imm8_, "0x%%02x", 7);
+
 	grouping_counter = 0;
 	for (	int op_c = opcode
 		;	op_c < (opcode + group_ofs * group_cnt)
@@ -1003,33 +1024,24 @@ void DECODE_INSTR(void)
 	{
 		INDENT(token_scope - 1);ADD_TXT("{\n");
 
-		char *REPRs = malloc(strlen(REPR) + 1);
-		*REPRs = '\0';
-
-		char *_addr16_ = strstr(REPR, "_addr16");
-		if (_addr16_ != NULL)
-		{
-			memcpy(REPRs, REPR, _addr16_ - REPR);
-			memcpy(REPRs + (_addr16_ - REPR), "%%s", 3);
-			strcpy(REPRs + (_addr16_ - REPR) + 3, _addr16_ + 7);
-			memcpy(_addr16_, "0x%%04x", 7);
-		}
-
-		char *_imm8_ = strstr(REPR, "__imm8_");
-		if (_imm8_ != NULL) memcpy(_imm8_, "0x%%02x", 7);
-
 		sprintf(tmp_logic, sLOGIC, REPR_ARR[grouping_counter]);
-		sprintf(tmp, REPR, REPR_ARR[grouping_counter]);
+
+		sprintf(tmp, REPR,  REPR_ARR[grouping_counter]);
 		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", tmp);
+
 		sprintf(tmp, REPRs, REPR_ARR[grouping_counter]);
 		INDENT(token_scope);	ADD_TXT("/* REPR:        */  \"%s\",\n", tmp);
+
 		INDENT(token_scope);	ADD_TXT("/* opcode:      */  0x%02x,\n", op_c);
 		INDENT(token_scope);	ADD_TXT("/* operation:   */  %s,\n",	 operation);
 		INDENT(token_scope);	ADD_TXT("/* instr_count: */  1,\n",		 instr_count_ARR[grouping_counter++]);
 		INDENT(token_scope);	ADD_TXT("/* cycles:      */  4,\n",		 4);//cycles_ARR[grouping_counter]);
 		INDENT(token_scope);	ADD_TXT("/* PARAM:       */  %d,\n",	 imm_chars);
+		INDENT(token_scope);	ADD_TXT("/* bIsSymbolic: */  %s,\n",	 bIsSymbolic);
 		INDENT(token_scope);	ADD_TXT("/* logic:       */  %s,\n",	 tmp_logic);
 	}
+
+	free(REPRs);
 
 	free(tmp_logic);
 	free(tmp);
