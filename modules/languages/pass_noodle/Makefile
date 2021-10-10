@@ -17,13 +17,14 @@ INCLUDE	:= -I. -I../../../include -I../include
 
 CFLAGS	:= -lfl -D_DEBUG -Wno-int-conversion
 
-default:		pass_noodle preach_modest
+default:		$(EXE_PA) $(EXE_PR)
+# default:		pass_noodle preach_modest
 
-pass_noodle:		pass_noodle.gen.h
-	$(MAKE) $(EXE_PA)
+# pass_noodle:		pass_noodle.gen.h
+# 	$(MAKE) $(EXE_PA)
 
-preach_modest:		preach_modest.gen.h
-	$(MAKE) $(EXE_PR)
+# preach_modest:		preach_modest.gen.h
+# 	$(MAKE) $(EXE_PR)
 
 pass_noodle.gen.h:	pass_noodle_rules.l
 	flex -o $@ $^
@@ -31,11 +32,13 @@ pass_noodle.gen.h:	pass_noodle_rules.l
 preach_modest.gen.h:	preach_modest_rules.l
 	flex -o $@ $^
 
-$(EXE_PA):		pass_noodle.o
-	$(CC) -O2 -s $^ -o $@ $(INCLUDE) $(CFLAGS)
+$(EXE_PA):		pass_noodle.gen.h
+	$(MAKE) pass_noodle.o
+	$(CC) -O2 -s pass_noodle.o -o $@ $(INCLUDE) $(CFLAGS)
 
-$(EXE_PR):		preach_modest.o
-	$(CC) -O2 -s $^ -o $@ $(INCLUDE) $(CFLAGS)
+$(EXE_PR):		preach_modest.gen.h
+	$(MAKE) preach_modest.o
+	$(CC) -O2 -s preach_modest.o -o $@ $(INCLUDE) $(CFLAGS)
 
 %.o:			%.c
 	$(CC) -O2 -s $^ -o $@ $(INCLUDE) $(CFLAGS) -c

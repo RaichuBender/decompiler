@@ -77,11 +77,11 @@ int main(int argc, const char *argv[])
 	MEM = malloc(file_sz);
 	fread(MEM, 0x400, file_sz / 0x400, fp);
 
-	byte_ptr = dadr - 1;
-	// byte_ptr = 0x01ab - 1;
+	byte_ptr = dadr;
+	// byte_ptr = 0x01ab;
 
 	// TODO do proper size deduction
-	source_mnemonic	   = malloc(256);
+	source_mnemonic	 = malloc(256);
 	formatted_mnemonic = malloc(256);
 
 	rtinsst = load_module(&REGULAR);

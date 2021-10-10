@@ -5,7 +5,7 @@
 	char str_read[64];                     \
 	do                                     \
 	{                                      \
-		printf("0x%04x > ", byte_ptr + 1); \
+		printf("0x%04x > ", byte_ptr); \
 		fgets(str_read, 64, stdin);
 
 #define CMD_LOOP_END \

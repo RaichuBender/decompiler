@@ -74,32 +74,32 @@ typedef enum _OPERATION
 
 typedef struct _MDL_INSTRUCTION
 {
-	char *			 mnemonic_regular;
-	char *			 mnemonic_symbolic;
-	u8				 opcode;
-	OPERATION        operation;
-	u32				 operand_count;
-	u32				 cycles;
-	int				 imm;
-	char *			 logic;
+	const char *mnemonic_regular;
+	const char *mnemonic_symbolic;
+	u8			opcode;
+	OPERATION	operation;
+	u32			operand_count;
+	u32			cycles;
+	int			imm;
+	char *		logic;
 // INSTRUCTION_ATTR attributes;
-// u32				 logic_count;
-// LOGIC *			 logic;
+// u32			logic_count;
+// LOGIC *		logic;
 } MDL_INSTRUCTION;
 
 typedef struct _INSTRUCTION
 {
-	char *			 mnemonic_regular;
-	char *			 mnemonic_symbolic;
-	u8				 opcode;
-	OPERATION        operation;
-//	u64				 addr;
-	u32				 operand_count;
-	u32				 cycles;
-	int				 imm;
-	char *			 logic;
+	const char *mnemonic_regular;
+	const char *mnemonic_symbolic;
+	u8			opcode;
+	OPERATION	operation;
+//	u64			addr;
+	u32			operand_count;
+	u32			cycles;
+	int			imm;
+	char *		logic;
 // INSTRUCTION_ATTR attributes;
-// u32				 logic_count;
-// LOGIC *			 logic;
+// u32			logic_count;
+// LOGIC *		logic;
 } INSTRUCTION;
 #endif //__INSTRUCTIONS_H__

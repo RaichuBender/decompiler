@@ -1,0 +1,4 @@
+#!/usr/bin/sh
+
+echo This is a dummy configure script.
+echo You can run make directly.

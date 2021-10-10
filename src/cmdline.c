@@ -26,14 +26,14 @@ CMD_LOOP_END
 
 
 DISASSEMBLE:
-	printf("\nDisassemble code block 0x%04x:\n", byte_ptr+1);
+	printf("\nDisassemble code block 0x%04x:\n", byte_ptr);
 	disassemble();
 	printf("End disassembly block.\n\n");
 	RETURN;
 
 
 DECOMPILE:
-	printf("\nDecompile code block 0x%04x:\n", byte_ptr+1);
+	printf("\nDecompile code block 0x%04x:\n", byte_ptr);
 	decompile();
 	printf("End decompilation block.\n\n");
 	RETURN;
@@ -42,7 +42,6 @@ DECOMPILE:
 LOC:
 	printf("Enter location to jump to: ");
 	GET_UL(byte_ptr);
-	--byte_ptr;
 	RETURN;
 
 

@@ -22,10 +22,10 @@ include objects.mk
 ifeq ($(STATIC_LINK),TRUE)
 OBJECTS		+=	$(LANG_OBJECTS)
 else
-LIB		:=	-Llib -llanguages $(shell pkg-config --libs gtk4) -rdynamic
+LIB		:=	-Llib -llanguages
 endif
 
-OBJECTS		+=	$(UI_OBJECTS)
+OBJECTS		+=	$(UI_OBJECTS) lib/symsym.o
 
 OUT		:=	$(BINDIR) $(OBJDIR)
 
@@ -35,6 +35,8 @@ default:	dbg
 d:	$(OUT)
 	@$(MAKE) -C modules/languages
 	@$(MAKE) $(PRECOMPILE)
+#	@$(MAKE) lib/libsymsym.so
+	@$(MAKE) lib/symsym.o
 	@$(MAKE) $(EXE)
 
 dbg:
@@ -57,6 +59,7 @@ install:
 uninstall:
 	-rm -r /usr/local/bin/decompiler /usr/lib/liblanguages.so /usr/local/lib/liblanguages.so /usr/local/share/decompiler ~/.local/share/applications/decompiler.desktop
 
+$(EXE):		LIB += $(shell pkg-config --libs gtk4) -rdynamic
 $(EXE):		$(OBJECTS)
 	$(CC) -o $@	$^ $(CFLAGS) $(INCLUDE) $(LIB)
 	-ln -s bin/main main
@@ -71,8 +74,12 @@ include/sys/common.h.gch:	 include/sys/common.h
 	$(CC) $< $(CFLAGS) $(INCLUDE)
 
 obj/%.o:	src/ui/%.c
-	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(shell pkg-config --cflags gtk4) $(LIB)
+	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(shell pkg-config --cflags gtk4) $(LIB) $(shell pkg-config --libs gtk4) -rdynamic
 
+# lib/libsymsym.so:	symsym.c
+#	$(CC) -o $@ -shared	$^ $(CFLAGS) $(INCLUDE) $(LIB)
+lib/symsym.o:	symsym.c
+	$(CC) -o $@ -c	$^ $(CFLAGS) $(INCLUDE) $(LIB)
 
 $(OUT):
 	@-mkdir $@
@@ -108,4 +115,4 @@ clean-all:
 	@$(MAKE) -C modules/languages clean-all
 
 clean-derived:
-	-rm -vf $(PRECOMPILE) include/*.gch include/*.pch
+	-rm -vf $(PRECOMPILE) include/*.gch include/*.pch #lib/libsymsym.so lib/symsym.o

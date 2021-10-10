@@ -24,11 +24,11 @@ int main(int argc, const char *argv[])
 	fprintf(fp, "#define NULL (0)\nchar *symsym[0x40][0x10000] =\n{\n");
 
 	for (int j = -1; ++j < 0x40;)
-	for (int i = -1; ++i < 0x10000;)
-	if (labels[j][i] != NULL)
-		fprintf(fp, "\n\"%s\",\n", labels[j][i]);
-	else
-		fprintf(fp, "NULL, ");
+		for (int i = -1; ++i < 0x10000;)
+			if (labels[j][i] != NULL)
+				fprintf(fp, "\n\"%s\",\n", labels[j][i]);
+			else
+				fprintf(fp, "NULL, ");
 
 	fprintf(fp, "\n};\n");
 

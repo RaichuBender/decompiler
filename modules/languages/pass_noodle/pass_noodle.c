@@ -739,6 +739,8 @@ void PROC_INSTR(char *raw_str, INSTR_TYPE type)
 		free(raw_str);
 
 		char *REPRs = malloc(strlen(REPR) + 1);
+		*REPRs = '\0';
+
 		char *_addr16_ = strstr(REPR, "addr16");
 		if (_addr16_ != NULL)
 		{
@@ -1002,6 +1004,8 @@ void DECODE_INSTR(void)
 		INDENT(token_scope - 1);ADD_TXT("{\n");
 
 		char *REPRs = malloc(strlen(REPR) + 1);
+		*REPRs = '\0';
+
 		char *_addr16_ = strstr(REPR, "_addr16");
 		if (_addr16_ != NULL)
 		{

@@ -25,7 +25,7 @@ default:	pass_noodle_tool
 	@echo '--------------------'
 	@-rm -vf include/*_def.inc*
 	@$(MAKE) -f noodles.mk $(MODULE_SPECS)
-	@rm -f $(MODULE_SPECS)
+#	@rm -f $(MODULE_SPECS)
 	@echo ''
 	@echo '--------------------'
 	@echo 'Parsing SUCCES!'
@@ -42,8 +42,9 @@ pass_noodle_tool:
 
 .PHONY:		clean clean-all
 clean:
+	-rm -vf $(MODULE_SPECS)
 	@-$(MAKE) -C pass_noodle clean
 
 clean-all:
-	-rm -rvf src/*.ndl.c include/*.gen.h noodles/*.preproc
+	-rm -rvf $(MODULE_SPECS) src/*.ndl.c include/*.gen.h noodles/*.preproc
 	@-$(MAKE) -C pass_noodle clean-all
