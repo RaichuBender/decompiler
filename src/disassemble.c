@@ -58,8 +58,16 @@ extern char *symsym[0x40][0x10000];
 static inline void
 print_invalid(	u8 addr2, u16 addr4	)
 {
+	char b0h = (MEM[byte_ptr] >> 4);
+	char b0l = (MEM[byte_ptr] &  7);
+	b0h += (b0h > 9) ? 'a'-0xa : '0';
+	b0l += (b0l > 9) ? 'a'-0xa : '0';
+
 	printf(MNEMONIC_FMT_INVALID,
 			addr2, addr4,
+			b0h, b0l,
+			' ', ' ',
+			' ', ' ',
 			MEM[byte_ptr]);
 }
 
@@ -77,9 +85,43 @@ print_valid(	u8 addr2, u16 addr4	)
 	if (symsym[addr2][addr4] != NULL)
 		printf("%s:\n", symsym[addr2][addr4]);
 
-	printf(MNEMONIC_FMT_VALID,
-			addr2, addr4,
-			formatted_mnemonic);
+	char b0h = ' ', b0l = ' ';
+	char b1h = ' ', b1l = ' ';
+	char b2h = ' ', b2l = ' ';
+
+	switch (THIS_INSTRUCTION.operand_count)
+	{
+	case 3:
+		b2h = (MEM[byte_ptr + 2] >> 4);
+		b2l = (MEM[byte_ptr + 2] &  15);
+		b2h += (b2h > 9) ? 'a'-0xa : '0';
+		b2l += (b2l > 9) ? 'a'-0xa : '0';
+	case 2:
+		b1h = (MEM[byte_ptr + 1] >> 4);
+		b1l = (MEM[byte_ptr + 1] &  15);
+		b1h += (b1h > 9) ? 'a'-0xa : '0';
+		b1l += (b1l > 9) ? 'a'-0xa : '0';
+	case 1:
+		b0h = (MEM[byte_ptr] >> 4);
+		b0l = (MEM[byte_ptr] &  15);
+		b0h += (b0h > 9) ? 'a'-0xa : '0';
+		b0l += (b0l > 9) ? 'a'-0xa : '0';
+
+		printf(MNEMONIC_FMT_VALID,
+				addr2, addr4,
+				b0h, b0l,
+				b1h, b1l,
+				b2h, b2l,
+				formatted_mnemonic);
+		return;
+	
+	default:
+		return;
+	}
+
+	// printf(MNEMONIC_FMT_VALID,
+	// 		addr2, addr4,
+	// 		formatted_mnemonic);
 }
 
 

@@ -270,11 +270,11 @@ MACRO:LOAD( _REG_, _OP_B_ )
 			}
 		}
 
-		"LD (C), A": MOV_STOR	0xe2	2 8
+		"LD (C), A": MOV_STOR	0xe2	1 8
 		{
 			"*(0xff00|C) = A;\n"
 		}
-		"LD A, (C)": MOV_STOR	0xf2	2 8
+		"LD A, (C)": MOV_STOR	0xf2	1 8
 		{
 			"A = *(0xff00|C);\n"
 		}
@@ -682,7 +682,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		{
 			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
 			PARAM:	{	ZF==0,	ZF==1,	CF==0,	CF==1	}
-			INSTR_COUNT:	3
+			INSTR_COUNT:	2
 			CYCLES:	12
 
 			{
@@ -714,7 +714,7 @@ MACRO:LOAD( _REG_, _OP_B_ )
 		"CALL %s, _addr16", IMM16: COND_CALL	GROUP(  0xc4, 4, 8  )
 		{
 			REPR:	{    "NZ",	"Z",	"NC",	"C"    }
-			PARAM:	0
+			PARAM:	{	0,	0,	0,	0	}
 			INSTR_COUNT:	3
 			CYCLES:	12
 

@@ -99,7 +99,7 @@ u8 *MtMoonB2F_Script(u8 p1)
 	if (ArePlayerCoordsInArray(&CoordsData_49d37, flags | CoordsData_49d37))
 	{
 		ret = rst10(wd72e - 1, 33);
-		*ret &= 0b0001000;
+		*ret &= 0b00010000;
 		return ret;
 	}
 	else

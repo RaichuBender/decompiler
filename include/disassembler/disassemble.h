@@ -60,11 +60,11 @@ void decompile(void);
 #	define MNM_TWO					bTermCol ? MNM_TWO_C				: MNM_TWO_G
 #	define MNM_THREE				bTermCol ? MNM_THREE_C				: MNM_THREE_G
 
-#	define MNEMONIC_FMT_VALID_C		C_MAGENTA	"%02x"		C_WHITE	":"	CB_BLUE "%04x\t\t"		F_RESET "%s\n"	F_RESET
-#	define MNEMONIC_FMT_INVALID_C	C_RED		"%02x:%04x"	C_RED	"\t\t0x%02x\t< ¡¡¡ invalid !!! >\n"			F_RESET
+#	define MNEMONIC_FMT_VALID_C		C_MAGENTA	"%02x"		C_WHITE	":"	CB_BLUE "%04x\t [ %c%c %c%c %c%c ] \t"		F_RESET "%s\n"	F_RESET
+#	define MNEMONIC_FMT_INVALID_C	C_RED		"%02x:%04x"	C_RED	"\t [ %c%c %c%c %c%c ] \t0x%02x\t< ¡¡¡ invalid !!! >\n"			F_RESET
 
-#	define MNEMONIC_FMT_VALID_G		"%02x:%04x\t\t%s\n"
-#	define MNEMONIC_FMT_INVALID_G	"%02x:%04x\t\t0x%02x\t< ¡¡¡ invalid !!! >\n"
+#	define MNEMONIC_FMT_VALID_G		"%02x:%04x\t [ %c%c %c%c %c%c ] \t%s\n"
+#	define MNEMONIC_FMT_INVALID_G	"%02x:%04x\t [ %c%c %c%c %c%c ] \t0x%02x\t< ¡¡¡ invalid !!! >\n"
 
 #	define MNM_ONE_C				"%s%s"		F_RESET
 #	define MNM_TWO_C				"%s%s\t"	C_GREEN "%s"	F_RESET
@@ -78,8 +78,8 @@ void decompile(void);
 
 	static const char OPERATION_COLOR[13][20] = { "" };
 
-#	define MNEMONIC_FMT_VALID		"%02x:%04x\t\t%s\n"
-#	define MNEMONIC_FMT_INVALID		"%02x:%04x\t\t0x%02x\t< ¡¡¡ invalid !!! >\n"
+#	define MNEMONIC_FMT_VALID		"%02x:%04x\t [ %c%c %c%c %c%c ] \t%s\n"
+#	define MNEMONIC_FMT_INVALID		"%02x:%04x\t [ %c%c %c%c %c%c ] \t0x%02x\t< ¡¡¡ invalid !!! >\n"
 
 #	define MNM_ONE					"%s%s"
 #	define MNM_TWO					"%s%s\t%s"
